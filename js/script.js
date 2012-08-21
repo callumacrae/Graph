@@ -78,3 +78,24 @@ graph.draw({
 		{day: 10, spoons: 7}
 	]
 });
+
+
+el = document.getElementById('graph4');
+graph = new Graph(el, 300, 200);
+
+graph.attr({
+	barColor: 'red'
+});
+graph.draw({
+	type: 'bar',
+	title: 'Bar chart',
+	x: 'day',
+	y: 'spoons',
+	data: [
+		{day: 'Monday', spoons: 6},
+		{day: 'Tuesday', spoons: 0},
+		{day: 'Wednesday', spoons: 3},
+		{day: 'Thursday', spoons: 1},
+		{day: 'Friday', spoons: 5}
+	]
+});

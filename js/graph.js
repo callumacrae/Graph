@@ -1,3 +1,5 @@
+// TODO: Allow functions for all attrs
+
 /**
  * Return a new graph object.
  *
@@ -21,6 +23,9 @@ function Graph(element, width, height) {
 
 	// Attributes to be set by .attr
 	this.attrs = {
+		barBorderColor: 'black',
+		barColor: 'red', // Colour of bars (can be a function)
+		barOpacity: 1, // Opacity of bars
 		pointColor: 'red', // Colour of points
 		pointOpacity: 1, // Opacity of point
 		pointRadius: 5, // Radius of point
@@ -54,6 +59,10 @@ GraphError.prototype.constructor = GraphError;
  */
 Graph.prototype.draw = function (info) {
 	switch (info.type) {
+		case 'bar':
+			this.drawBarChart(info);
+			break;
+
 		case 'line':
 			this.drawLineGraph(info);
 			break;
@@ -203,6 +212,64 @@ Graph.prototype.drawScatterGraph = function (info) {
 			fill: attrs.pointColor,
 			stroke: attrs.pointColor,
 			opacity: attrs.pointOpacity
+		});
+	});
+};
+
+/**
+ * Draws a bar chat. This is an internal function to get rid of some
+ * indentation that would be required if it were in the above switch statement,
+ * but is still useful for the documentation below.
+ *
+ * @private
+ *
+ * @param {object} info Object containing the following properties:
+ *  x: The name of the data on the x axis (will be used in the data objects).
+ *      If not specified, will default to "x".
+ *  y: The name of the data on the y axis (will be used in the data objects).
+ *      If not specified, will default to "y".
+ *  data: An array containing "data objects", saying where bars should be.
+ *      A data object could be like this (if the x and y properties mentioned
+ *      above are set to "age" and "height"):
+ *      {person: 'Bob', cakes: 7}
+ */
+Graph.prototype.drawBarChart = function (info) {
+	var paper = this.paper,
+		attrs = this.attrs,
+		height = this.height,
+		width = this.width,
+		barWidth, length, maxY, x, y;
+
+	x = info.x || 'x';
+	y = info.y || 'y';
+
+	if (x === 'xpos' || y === 'ypos') {
+		throw new GraphError('Cannot use xpos or ypos as x and y keys');
+	}
+
+	// Work out maxY and add 5%
+	maxY = info.data[0][y];
+	this.each(info.data, function (bar) {
+		if (bar[y] > maxY) {
+			maxY = bar[y];
+		}
+	});
+	maxY *= 1.05;
+
+	length = info.data.length;
+	barWidth = width / length * 0.8;
+
+	// Draw the bars
+	this.each(info.data, function (point, index) {
+		point.xpos = width / length * (index + 0.1);
+		point.ypos = (height - height / maxY * point[y] - 2);
+		point.barHeight = height - point.ypos - 1;
+
+		point.bar = paper.rect(point.xpos, point.ypos, barWidth, point.barHeight);
+		point.bar.attr({
+			'stroke': attrs.barBorderColor,
+			'fill': attrs.barColor,
+			'opacity': attrs.barOpacity
 		});
 	});
 };
