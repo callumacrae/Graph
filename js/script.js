@@ -29,6 +29,10 @@ el = document.getElementById('graph2');
 graph = new Graph(el, 300, 200);
 
 graph.attr({
+	pointColor: function () {
+		var r = function(){return Math.round(Math.random() * 255)}
+		return 'rgb(' + [r(), r(), r()] + ')';
+	},
 	pointOpacity: 0.9,
 	pointRadius: 3
 });
@@ -58,7 +62,9 @@ graph = new Graph(el, 300, 200);
 
 graph.attr({
 	pointOpacity: 0.9,
-	pointRadius: 3
+	pointRadius: function (y, maxY) {
+		return 15 / maxY * y + 2;
+	}
 });
 graph.draw({
 	type: 'scatter',
@@ -84,7 +90,13 @@ el = document.getElementById('graph4');
 graph = new Graph(el, 300, 200);
 
 graph.attr({
-	barColor: 'red'
+	barColor: function (height, maxHeight) {
+		var red = Math.round(255 - 255 / maxHeight * height).toString(16);
+		if (red.length === 1) {
+			red = '0' + red;
+		}
+		return '#ff' + red + red;
+	}
 });
 graph.draw({
 	type: 'bar',

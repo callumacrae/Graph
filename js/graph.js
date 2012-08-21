@@ -1,5 +1,3 @@
-// TODO: Allow functions for all attrs
-
 /**
  * Return a new graph object.
  *
@@ -97,8 +95,7 @@ Graph.prototype.draw = function (info) {
  *      {age: 12, height: 145}
  */
 Graph.prototype.drawLineGraph = function (info) {
-	var attrs = this.attrs,
-		line, prevX, prevY;
+	var line, prevX, prevY;
 
 	// Draw scatter graph
 	this.drawScatterGraph(info);
@@ -133,9 +130,9 @@ Graph.prototype.drawLineGraph = function (info) {
 	// Cases that do not want this should return
 	this.path = this.paper.path(line);
 	this.path.attr({
-		'stroke': attrs.lineColor,
-		'stroke-opacity': attrs.lineOpacity,
-		'stroke-width': attrs.lineWidth
+		'stroke': this.getAttr('lineColor'),
+		'stroke-opacity': this.getAttr('lineOpacity'),
+		'stroke-width': this.getAttr('lineWidth')
 	});
 	this.path.toBack();
 };
@@ -159,7 +156,6 @@ Graph.prototype.drawLineGraph = function (info) {
  */
 Graph.prototype.drawScatterGraph = function (info) {
 	var paper = this.paper,
-		attrs = this.attrs,
 		height = this.height,
 		width = this.width,
 		perc5, maxX, maxY, minX, minY, x, y;
@@ -207,13 +203,24 @@ Graph.prototype.drawScatterGraph = function (info) {
 		point.xpos = width / (maxX - minX) * (point[x] - minX);
 		point.ypos = height / (maxY - minY) * (maxY - point[y]);
 
-		point.point = paper.circle(point.xpos, point.ypos, attrs.pointRadius);
+		var attrArgs = [{
+			x: point[x],
+			minX: minX,
+			maxX: maxX,
+			y: point[y],
+			minY: minY,
+			maxY: maxY
+		}],
+			color = this.getAttr('pointColor', attrArgs),
+			radius = this.getAttr('pointRadius', [point[y], maxY]);
+
+		point.point = paper.circle(point.xpos, point.ypos, radius);
 		point.point.attr({
-			fill: attrs.pointColor,
-			stroke: attrs.pointColor,
-			opacity: attrs.pointOpacity
+			fill: color,
+			stroke: color,
+			opacity: this.getAttr('pointOpacity', attrArgs)
 		});
-	});
+	}, this);
 };
 
 /**
@@ -235,7 +242,6 @@ Graph.prototype.drawScatterGraph = function (info) {
  */
 Graph.prototype.drawBarChart = function (info) {
 	var paper = this.paper,
-		attrs = this.attrs,
 		height = this.height,
 		width = this.width,
 		barWidth, length, maxY, x, y;
@@ -267,11 +273,11 @@ Graph.prototype.drawBarChart = function (info) {
 
 		point.bar = paper.rect(point.xpos, point.ypos, barWidth, point.barHeight);
 		point.bar.attr({
-			'stroke': attrs.barBorderColor,
-			'fill': attrs.barColor,
-			'opacity': attrs.barOpacity
+			'stroke': this.getAttr('barBorderColor', [point[y], maxY]),
+			'fill': this.getAttr('barColor', [point[y], maxY]),
+			'opacity': this.getAttr('barOpacity', [point[y], maxY])
 		});
-	});
+	}, this);
 };
 
 /**
@@ -282,15 +288,19 @@ Graph.prototype.drawBarChart = function (info) {
  * @param {Array|object} ary Array or object to loop through.
  * @param {function} cb Function to call on each item.
  */
-Graph.prototype.each = function (ary, cb) {
+Graph.prototype.each = function (ary, cb, scope) {
+	if (typeof scope === 'undefined') {
+		scope = this;
+	}
+
 	if (this.isArray(ary)) {
 		for (var i = 0; i < ary.length; i++) {
-			cb(ary[i], i);
+			cb.call(scope, ary[i], i);
 		}
 	} else {
 		for (var prop in ary) {
 			if (ary.hasOwnProperty(prop)) {
-				cb(prop, ary[prop]);
+				cb.call(scope, prop, ary[prop]);
 			}
 		}
 	}
@@ -330,6 +340,23 @@ Graph.prototype.attr = function (name, value) {
 	}
 
 	return this;
+};
+
+/**
+ * Get attribute. If it is a function, it will be evaluated and the result
+ * returned, else the attribute will be returned.
+ *
+ * @param {string} name The name of the attribute.
+ * @param {Array} data Data to be given to the attribute if it is a function.
+ *
+ * @return {*} Usually a string or a number.
+ */
+Graph.prototype.getAttr = function (name, data) {
+	if (typeof this.attrs[name] === 'function') {
+		return this.attrs[name].apply(null, data);
+	} else {
+		return this.attrs[name];
+	}
 };
 
 
