@@ -112,7 +112,8 @@ Graph.prototype.drawLineGraph = function (info) {
 				if (i === 0) {
 					line = 'M' + point.xpos + ' ' + point.ypos;
 				} else {
-					line += 'l' + (point.xpos - prevX) + ' ' + (point.ypos - prevY);
+					line += 'l' + (point.xpos - prevX) +
+						' ' + (point.ypos - prevY);
 				}
 				prevX = point.xpos;
 				prevY = point.ypos;
