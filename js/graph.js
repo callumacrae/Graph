@@ -23,6 +23,7 @@ function Graph(element, width, height) {
 	this.attrs = {
 		pointColor: 'red', // Colour of points
 		pointOpacity: 1, // Opacity of point
+		pointRadius: 5, // Radius of point
 		lineColor: 'black', // Colour of lines
 		lineOpacity: 1, // Opacity of line
 		lineWidth: 1 // Width of line in pixels
@@ -196,7 +197,7 @@ Graph.prototype.drawScatterGraph = function (info) {
 		point.xpos = width / (maxX - minX) * (point[x] - minX);
 		point.ypos = height / (maxY - minY) * (maxY - point[y]);
 
-		point.point = paper.circle(point.xpos, point.ypos, 5);
+		point.point = paper.circle(point.xpos, point.ypos, attrs.pointRadius);
 		point.point.attr({
 			fill: attrs.pointColor,
 			stroke: attrs.pointColor,

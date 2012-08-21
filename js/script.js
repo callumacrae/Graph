@@ -1,33 +1,80 @@
-var el = document.getElementById('graph'),
-	graph = new Graph(el, 500, 400);
+var el = document.getElementById('graph1'),
+	graph = new Graph(el, 300, 200);
 
 graph.attr({
 	pointOpacity: 0.9,
-	lineWidth: 2
+	pointRadius: 3
 });
 graph.draw({
 	type: 'line',
-	title: 'Spoons per day over a month',
+	title: 'Straight line graph',
+	line: 'straight',
+	x: 'day',
+	y: 'spoons',
+	data: [
+		{day: 1, spoons: 2},
+		{day: 2, spoons: 1},
+		{day: 3, spoons: 2},
+		{day: 4, spoons: 5},
+		{day: 5, spoons: 4},
+		{day: 6, spoons: 7},
+		{day: 7, spoons: 6},
+		{day: 8, spoons: 4},
+		{day: 9, spoons: 3}
+	]
+});
+
+
+el = document.getElementById('graph2');
+graph = new Graph(el, 300, 200);
+
+graph.attr({
+	pointOpacity: 0.9,
+	pointRadius: 3
+});
+graph.draw({
+	type: 'line',
+	title: 'Curved line graph',
 	line: 'curved',
 	x: 'day',
 	y: 'spoons',
 	data: [
 		{day: 1, spoons: 1},
-		{day: 2, spoons: 1},
-		{day: 3, spoons: 2},
+		{day: 2, spoons: 2},
+		{day: 3, spoons: 1},
 		{day: 4, spoons: 3},
-		{day: 5, spoons: 4},
-		{day: 6, spoons: 7},
-		{day: 7, spoons: 6},
-		{day: 8, spoons: 5},
+		{day: 5, spoons: 1},
+		{day: 6, spoons: 5},
+		{day: 7, spoons: 1},
+		{day: 8, spoons: 6},
 		{day: 9, spoons: 4},
-		{day: 10, spoons: 4},
-		{day: 11, spoons: 3},
-		{day: 12, spoons: 2},
-		{day: 13, spoons: 1},
-		{day: 14, spoons: 0},
-		{day: 15, spoons: 0},
-		{day: 16, spoons: 0},
-		{day: 17, spoons: 2}
+		{day: 10, spoons: 4}
+	]
+});
+
+
+el = document.getElementById('graph3');
+graph = new Graph(el, 300, 200);
+
+graph.attr({
+	pointOpacity: 0.9,
+	pointRadius: 3
+});
+graph.draw({
+	type: 'scatter',
+	title: 'Scatter graph',
+	x: 'day',
+	y: 'spoons',
+	data: [
+		{day: 1, spoons: 10},
+		{day: 2, spoons: 15},
+		{day: 3, spoons: 3},
+		{day: 4, spoons: 9},
+		{day: 5, spoons: 5},
+		{day: 6, spoons: 12},
+		{day: 7, spoons: 1},
+		{day: 8, spoons: 19},
+		{day: 9, spoons: 3},
+		{day: 10, spoons: 7}
 	]
 });
