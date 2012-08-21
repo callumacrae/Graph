@@ -8,7 +8,7 @@ graph.attr({
 graph.draw({
 	type: 'line',
 	title: 'Spoons per day over a month',
-	line: 'straight',
+	line: 'curved',
 	x: 'day',
 	y: 'spoons',
 	data: [

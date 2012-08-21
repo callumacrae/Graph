@@ -95,6 +95,16 @@ Graph.prototype.drawLineGraph = function (info) {
 
 	// Join dots
 	switch (info.line) {
+		case 'curved':
+			this.each(info.data, function (point, i) {
+				if (i === 0) {
+					line = 'M' + point.xpos + ' ' + point.ypos + 'R';
+				} else {
+					line += ' ' + point.xpos + ' ' + point.ypos;
+				}
+			});
+			break;
+
 		case 'straight':
 		default:
 			this.each(info.data, function (point, i) {
@@ -106,16 +116,17 @@ Graph.prototype.drawLineGraph = function (info) {
 				prevX = point.xpos;
 				prevY = point.ypos;
 			});
-
-			this.path = this.paper.path(line);
-			this.path.attr({
-				'stroke': attrs.lineColor,
-				'stroke-opacity': attrs.lineOpacity,
-				'stroke-width': attrs.lineWidth
-			});
-			this.path.toBack();
 			break;
 	}
+
+	// Cases that do not want this should return
+	this.path = this.paper.path(line);
+	this.path.attr({
+		'stroke': attrs.lineColor,
+		'stroke-opacity': attrs.lineOpacity,
+		'stroke-width': attrs.lineWidth
+	});
+	this.path.toBack();
 };
 
 /**
