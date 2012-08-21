@@ -34,7 +34,8 @@ graph.attr({
 		return 'rgb(' + [r(), r(), r()] + ')';
 	},
 	pointOpacity: 0.9,
-	pointRadius: 3
+	pointRadius: 3,
+	textPosition: 'left'
 });
 graph.draw({
 	type: 'line',
@@ -64,7 +65,8 @@ graph.attr({
 	pointOpacity: 0.9,
 	pointRadius: function (y, maxY) {
 		return 15 / maxY * y + 2;
-	}
+	},
+	textPosition: 'center'
 });
 graph.draw({
 	type: 'scatter',
@@ -96,6 +98,9 @@ graph.attr({
 			red = '0' + red;
 		}
 		return '#ff' + red + red;
+	},
+	hoverText: function (point) {
+		return point.day + ': ' + point.spoons + ' spoons.';
 	}
 });
 graph.draw({

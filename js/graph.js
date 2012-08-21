@@ -23,13 +23,20 @@ function Graph(element, width, height) {
 	this.attrs = {
 		barBorderColor: 'black',
 		barColor: 'red', // Colour of bars (can be a function)
+		barHoverColor: 'darkgray',
 		barOpacity: 1, // Opacity of bars
 		pointColor: 'red', // Colour of points
+		pointHoverColor: 'darkred', // Colour of points on hover
 		pointOpacity: 1, // Opacity of point
 		pointRadius: 5, // Radius of point
 		lineColor: 'black', // Colour of lines
 		lineOpacity: 1, // Opacity of line
-		lineWidth: 1 // Width of line in pixels
+		lineWidth: 1, // Width of line in pixels
+		textPosition: 'right' // Position of text (left, right, center)
+	};
+
+	this.attrs.hoverText = function (point, x, y) {
+		return x + ': ' + point[x] + ', ' + y + ': ' + point[y];
 	};
 }
 
@@ -74,6 +81,8 @@ Graph.prototype.draw = function (info) {
 			throw new GraphError('Graph type does not exist');
 			break;
 	}
+
+	this.setText(info.title);
 };
 
 /**
@@ -220,6 +229,23 @@ Graph.prototype.drawScatterGraph = function (info) {
 			stroke: color,
 			opacity: this.getAttr('pointOpacity', attrArgs)
 		});
+
+		point.point.hover(function () {
+			var hoverColor = this.getAttr('pointHoverColor', attrArgs);
+			if (hoverColor) {
+				point.point.attr({
+					fill: hoverColor,
+					stroke: hoverColor
+				});
+			}
+			this.setText(this.getAttr('hoverText', [point, x, y]));
+		}, function () {
+			point.point.attr({
+				fill: color,
+				stroke: color
+			});
+			this.setText(info.title);
+		}, this);
 	}, this);
 };
 
@@ -244,7 +270,7 @@ Graph.prototype.drawBarChart = function (info) {
 	var paper = this.paper,
 		height = this.height,
 		width = this.width,
-		barWidth, length, maxY, x, y;
+		barWidth, length, maxY, setText, x, y;
 
 	x = info.x || 'x';
 	y = info.y || 'y';
@@ -271,13 +297,51 @@ Graph.prototype.drawBarChart = function (info) {
 		point.ypos = (height - height / maxY * point[y] - 2);
 		point.barHeight = height - point.ypos - 1;
 
-		point.bar = paper.rect(point.xpos, point.ypos, barWidth, point.barHeight);
-		point.bar.attr({
+		var bar = paper.rect(point.xpos, point.ypos, barWidth, point.barHeight),
+			color = this.getAttr('barColor', [point[y], maxY]);
+
+		point.bar = bar;
+		bar.attr({
 			'stroke': this.getAttr('barBorderColor', [point[y], maxY]),
-			'fill': this.getAttr('barColor', [point[y], maxY]),
+			'fill': color,
 			'opacity': this.getAttr('barOpacity', [point[y], maxY])
 		});
+
+		bar.hover(function () {
+			bar.attr('fill', this.getAttr('barHoverColor', [point[y], maxY]));
+			this.setText(this.getAttr('hoverText', [point, x, y]));
+		}, function () {
+			bar.attr('fill', color);
+			this.setText(info.title);
+		}, this);
 	}, this);
+};
+
+Graph.prototype.setText = function (text) {
+	var tmpTextNode = this.paper.text(this.width / 2, 15, text),
+		textWidth = tmpTextNode[0].clientWidth,
+		textPosition = this.getAttr('textPosition'),
+		x;
+
+	if (typeof this.textNode !== 'undefined') {
+		this.textNode.remove();
+	}
+
+	if (textPosition === 'center') {
+		this.textNode = tmpTextNode; // Not so tmp...
+		return;
+	}
+
+	tmpTextNode.remove();
+
+	if (textPosition === 'left') {
+		x = textWidth / 2 + 10;
+	} else {
+		x = this.width - textWidth / 2 - 10;
+	}
+
+	this.textNode = this.paper.text(x, 15, text);
+	this.textNode.toFront();
 };
 
 /**
