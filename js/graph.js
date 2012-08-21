@@ -317,6 +317,11 @@ Graph.prototype.drawBarChart = function (info) {
 	}, this);
 };
 
+/**
+ * Set graph text. Isn't the most efficient of functions, but will do.
+ *
+ * @param {string} text The text to change to.
+ */
 Graph.prototype.setText = function (text) {
 	var tmpTextNode = this.paper.text(this.width / 2, 15, text),
 		textWidth = tmpTextNode[0].clientWidth,
