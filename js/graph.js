@@ -343,8 +343,10 @@ Graph.prototype.attr = function (name, value) {
 };
 
 /**
- * Get attribute. If it is a function, it will be evaluated and the result
- * returned, else the attribute will be returned.
+ * Get attribute for internal usage. If it is a function, it will be evaluated
+ * and the result returned, else the attribute will be returned.
+ *
+ * @private
  *
  * @param {string} name The name of the attribute.
  * @param {Array} data Data to be given to the attribute if it is a function.
