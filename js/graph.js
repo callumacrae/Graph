@@ -125,6 +125,25 @@ Graph.prototype.drawLineGraph = function (info) {
 
 	// Join dots
 	switch (info.line) {
+		case 'best fit':
+			var b, gradient, xsum, ysum, xysum, xxsum, yysum, n;
+			xsum = ysum = xysum = xxsum = yysum = 0;
+			n = info.data.length;
+
+			this.each(info.data, function (point) {
+				xsum += point.xpos;
+				ysum += point.ypos;
+				xysum += point.xpos * point.ypos;
+				xxsum += Math.pow(point.xpos, 2);
+				yysum += Math.pow(point.ypos, 2);
+			});
+
+			gradient = (n * xysum - xsum * ysum) / (n * xxsum - xsum * xsum);
+			b = (xxsum * ysum - xsum * xysum) / (n * xxsum - xsum * xsum);
+
+			line = 'M0 ' + Math.round(b) + 'l' + (b / -gradient) + ' ' + Math.round(-b);
+			break;
+
 		case 'curved':
 			this.each(info.data, function (point, i) {
 				if (i === 0) {

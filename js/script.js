@@ -64,6 +64,35 @@ el = document.getElementById('graph3');
 graph = new Graph(el, 300, 200);
 
 graph.attr({
+	pointRadius: 3,
+	textPosition: 'left',
+	lineWidth: 2
+});
+graph.draw({
+	type: 'line',
+	title: 'Line graph with best fit',
+	line: 'best fit',
+	x: 'day',
+	y: 'spoons',
+	data: [
+		{day: 1, spoons: 1},
+		{day: 2, spoons: 2},
+		{day: 3, spoons: 2},
+		{day: 4, spoons: 3},
+		{day: 5, spoons: 1},
+		{day: 6, spoons: 5},
+		{day: 7, spoons: 7},
+		{day: 8, spoons: 6},
+		{day: 9, spoons: 8},
+		{day: 10, spoons: 7}
+	]
+});
+
+
+el = document.getElementById('graph4');
+graph = new Graph(el, 300, 200);
+
+graph.attr({
 	pointOpacity: 0.9,
 	pointRadius: function (y, maxY) {
 		return 15 / maxY * y + 2;
@@ -92,7 +121,7 @@ graph.draw({
 });
 
 
-el = document.getElementById('graph4');
+el = document.getElementById('graph5');
 graph = new Graph(el, 300, 200);
 
 graph.attr({
