@@ -152,3 +152,34 @@ graph.draw({
 		{day: 'Friday', spoons: 5}
 	]
 });
+
+
+el = document.getElementById('graph6');
+graph = new Graph(el, 300, 200);
+
+graph.attr({
+	segmentColor: function (data, maxData) {
+		var red = Math.round(255 - 255 / maxData * data).toString(16);
+		if (red.length === 1) {
+			red = '0' + red;
+		}
+		return '#ff' + red + red;
+	},
+	segmentRadius: function (data, maxData) {
+		return 40 / maxData * data + 50;
+	},
+	animate: 'elastic'
+});
+graph.draw({
+	type: 'pie',
+	title: 'Pie chart',
+	dataName: 'day',
+	dataData: 'spoons',
+	data: [
+		{day: 'Monday', spoons: 6},
+		{day: 'Tuesday', spoons: 2},
+		{day: 'Wednesday', spoons: 3},
+		{day: 'Thursday', spoons: 1},
+		{day: 'Friday', spoons: 5}
+	]
+});

@@ -38,6 +38,11 @@ function Graph(element, width, height) {
 		lineColor: 'black', // Colour of lines
 		lineOpacity: 1, // Opacity of line
 		lineWidth: 1, // Width of line in pixels
+		segmentBorderColor: 'black', // Colour of border of pie chart segments
+		segmentColor: 'red', // Colour of pie chart segment
+		segmentHoverColor: 'darkgray', // Colour of pie chart segment on hover
+		segmentOpacity: 1, // Opacity of pie chart segment
+		segmentRadius: 100, // Radius of pie chart segments
 		showGrid: false, // Whether to show the grid-thing or not
 		textPosition: 'right' // Position of text (left, right, center)
 	};
@@ -81,6 +86,10 @@ Graph.prototype.draw = function (info) {
 			this.drawLineGraph(info);
 			break;
 
+		case 'pie':
+			this.drawPieChart(info);
+			break;
+
 		case 'scatter':
 			this.drawScatterGraph(info);
 			break;
@@ -93,7 +102,7 @@ Graph.prototype.draw = function (info) {
 
 	this.setText(info.title);
 
-	var cursor = this.getAttr('cursor');
+	cursor = this.getAttr('cursor');
 	if (cursor === 'default' && this.getAttr('showGrid')) {
 		this.element.style.cursor = 'none';
 	} else if (cursor !== 'default') {
@@ -369,7 +378,7 @@ Graph.prototype.drawBarChart = function (info) {
 	var paper = this.paper,
 		height = this.height,
 		width = this.width,
-		barWidth, length, maxY, setText, x, y;
+		barWidth, length, maxY, x, y;
 
 	x = info.x || 'x';
 	y = info.y || 'y';
@@ -425,6 +434,101 @@ Graph.prototype.drawBarChart = function (info) {
 			this.setText(this.getAttr('hoverText', [point, x, y]));
 		}, function () {
 			bar.attr('fill', color);
+			this.setText(info.title);
+		}, this);
+	}, this);
+};
+
+/**
+ * Draws a pie chart. This is an internal function to get rid of some
+ * indentation that would be required if it were in the above switch statement,
+ * but is still useful for the documentation below.
+ *
+ * @private
+ *
+ * @param {object} info Object containing the following properties:
+ *  dataName: The name of the data on the x axis (will be used in the data
+ *      objects). If not specified, will default to "x".
+ *  dataData: The name of the data on the y axis (will be used in the data
+ *      objects). If not specified, will default to "y".
+ *  data: An array containing "data objects", saying where bars should be.
+ *      A data object could be like this (if the dataName and dataData
+ *      properties mentioned above are set to "age" and "height"):
+ *      {person: 'Bob', cakes: 7}
+ */
+Graph.prototype.drawPieChart = function (info) {
+	var paper = this.paper,
+		width = this.width,
+		height = this.height,
+		angle = 0,
+		name, data, maxData, totalData;
+
+	name = info.dataName || 'name';
+	data = info.dataData || 'data';
+
+	// Work out maxData and totalData
+	maxData = info.data[0][data];
+	totalData = 0;
+	this.each(info.data, function (segment) {
+		totalData += segment[data];
+		if (segment[data] > maxData) {
+			maxData = segment[data];
+		}
+	});
+	maxData *= 1.05;
+
+	function sectorPath(cx, cy, r, startAngle, degrees) {
+		var rad = Math.PI / 180,
+			x1 = cx + r * Math.cos(-startAngle * rad),
+			x2 = cx + r * Math.cos(-(startAngle + degrees) * rad),
+			y1 = cy + r * Math.sin(-startAngle * rad),
+			y2 = cy + r * Math.sin(-(startAngle + degrees) * rad);
+		return ['M', cx, cy, 'L', x1, y1,
+			'A', r, r, 0, +(degrees > 180), 0, x2, y2, 'z'];
+	}
+
+	// Draw segments
+	this.each(info.data, function (segment, i) {
+		var degrees = 360 / totalData * segment[data],
+			args = [segment[data], maxData],
+			borderColor = this.getAttr('segmentBorderColor', args),
+			color = this.getAttr('segmentColor', args),
+			radius = this.getAttr('segmentRadius', args),
+			opacity = this.getAttr('segmentOpacity', args),
+			animate = this.getAttr('animate'),
+			animateTime = this.getAttr('animateTime'),
+			line;
+
+		if (animate === 'none') {
+			line = sectorPath(width / 2, height / 2, radius, angle, degrees);
+			segment.segment = paper.path(line);
+		} else {
+			line = sectorPath(width / 2, height / 2, 1, angle, degrees);
+			segment.segment = paper.path(line);
+
+			line = sectorPath(width / 2, height / 2, radius, angle, degrees);
+			setTimeout(function () {
+				segment.segment.animate({
+					path: line
+				}, animateTime, animate);
+			}, i * animateTime / 10)
+		}
+
+		angle += degrees;
+
+		segment.segment.attr({
+			stroke: borderColor,
+			fill: color,
+			opacity: opacity
+		});
+
+		segment.segment.hover(function () {
+			segment.segment.attr({
+				fill: this.getAttr('segmentHoverColor', args)
+			});
+			this.setText(this.getAttr('hoverText', [segment, name, data]));
+		}, function () {
+			segment.segment.attr('fill', color);
 			this.setText(info.title);
 		}, this);
 	}, this);
