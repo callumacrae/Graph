@@ -175,7 +175,8 @@ graph.draw({
 	data: [
 		{person: 'Bob', spoons: 2},
 		{person: 'Mary', spoons: 6},
-		{person: 'Sam', spoons: 3}
+		{person: 'Sam', spoons: 3},
+		{person: 'Callum', spoons: 4.5}
 	]
 });
 
