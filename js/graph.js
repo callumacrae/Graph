@@ -27,7 +27,8 @@ function Graph(element, width, height) {
 		barOpacity: 1, // Opacity of bars
 		cursor: 'default', // Cursor (default "default")
 		gridLineWidth: 1, // Width of grid line in pixels
-		gridLineColor: 'lightgray', // Color of grid line
+		gridLineColor: 'gray', // Color of grid line
+		gridLineOpacity: 0.8, // Opacity of grid line
 		pointColor: 'red', // Colour of points
 		pointHoverColor: 'darkred', // Colour of points on hover
 		pointOpacity: 1, // Opacity of point
@@ -267,6 +268,7 @@ Graph.prototype.drawScatterGraph = function (info) {
 		graphY = paper.path('M0 0l0 0').toBack().hide();
 
 		attr = {
+			'opacity': this.getAttr('gridLineOpacity'),
 			'stroke-width': this.getAttr('gridLineWidth'),
 			'stroke': this.getAttr('gridLineColor')
 		};
