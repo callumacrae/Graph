@@ -21,6 +21,8 @@ function Graph(element, width, height) {
 
 	// Attributes to be set by .attr
 	this.attrs = {
+		animate: 'none', // Animation. none / bounce / linear
+		animateTime: 1000, // Animation time in ms
 		barBorderColor: 'black',
 		barColor: 'red', // Colour of bars (can be a function)
 		barHoverColor: 'darkgray',
@@ -121,6 +123,9 @@ Graph.prototype.drawLineGraph = function (info) {
 	var line, prevX, prevY;
 
 	// Draw scatter graph
+	if (info.line !== 'best fit') {
+		this.attr('animate', 'none');
+	}
 	this.drawScatterGraph(info);
 
 	// Join dots
@@ -242,7 +247,7 @@ Graph.prototype.drawScatterGraph = function (info) {
 	minY -= perc5;
 
 	// Draw the points
-	this.each(info.data, function (point) {
+	this.each(info.data, function (point, i) {
 		point.xpos = width / (maxX - minX) * (point[x] - minX);
 		point.ypos = height / (maxY - minY) * (maxY - point[y]);
 
@@ -255,9 +260,21 @@ Graph.prototype.drawScatterGraph = function (info) {
 			maxY: maxY
 		}],
 			color = this.getAttr('pointColor', attrArgs),
-			radius = this.getAttr('pointRadius', [point[y], maxY]);
+			radius = this.getAttr('pointRadius', [point[y], maxY]),
+			animate = this.getAttr('animate'),
+			animateTime = this.getAttr('animateTime', [i]);
 
-		point.point = paper.circle(point.xpos, point.ypos, radius);
+		if (animate !== 'none') {
+			point.point = paper.circle(point.xpos, point.ypos, 0);
+			setTimeout(function () {
+				point.point.animate({
+					r: radius
+				}, animateTime, animate);
+			}, i * animateTime / 10);
+		} else {
+			point.point = paper.circle(point.xpos, point.ypos, radius);
+		}
+
 		point.point.attr({
 			fill: color,
 			stroke: color,
@@ -332,7 +349,7 @@ Graph.prototype.drawScatterGraph = function (info) {
 };
 
 /**
- * Draws a bar chat. This is an internal function to get rid of some
+ * Draws a bar chart. This is an internal function to get rid of some
  * indentation that would be required if it were in the above switch statement,
  * but is still useful for the documentation below.
  *
@@ -375,12 +392,26 @@ Graph.prototype.drawBarChart = function (info) {
 
 	// Draw the bars
 	this.each(info.data, function (point, index) {
+		var animate = this.getAttr('animate'),
+			animateTime = this.getAttr('animateTime'),
+			bar, color;
+
 		point.xpos = width / length * (index + 0.1);
 		point.ypos = (height - height / maxY * point[y] - 2);
 		point.barHeight = height - point.ypos - 1;
 
-		var bar = paper.rect(point.xpos, point.ypos, barWidth, point.barHeight),
-			color = this.getAttr('barColor', [point[y], maxY]);
+		if (animate === 'none') {
+			bar = paper.rect(point.xpos, point.ypos, barWidth, point.barHeight);
+		} else {
+			bar = paper.rect(point.xpos, point.ypos + point.barHeight, barWidth, 0);
+			setTimeout(function () {
+				bar.animate({
+					y: point.ypos,
+					height: point.barHeight
+				}, animateTime, animate);
+			}, index * animateTime / 10)
+		}
+		color = this.getAttr('barColor', [point[y], maxY]);
 
 		point.bar = bar;
 		bar.attr({

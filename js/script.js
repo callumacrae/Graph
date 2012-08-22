@@ -64,7 +64,7 @@ el = document.getElementById('graph3');
 graph = new Graph(el, 300, 200);
 
 graph.attr({
-	pointRadius: 3,
+	pointRadius: 4,
 	textPosition: 'left',
 	lineWidth: 2
 });
@@ -99,7 +99,9 @@ graph.attr({
 	},
 	textPosition: 'center',
 	showGrid: true,
-	cursor: 'pointer'
+	cursor: 'pointer',
+	animate: 'linear',
+	animateTime: 500
 });
 graph.draw({
 	type: 'scatter',
@@ -134,7 +136,8 @@ graph.attr({
 	},
 	hoverText: function (point) {
 		return point.day + ': ' + point.spoons + ' spoons.';
-	}
+	},
+	animate: 'bounce'
 });
 graph.draw({
 	type: 'bar',
