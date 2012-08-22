@@ -371,7 +371,7 @@ Graph.prototype.drawScatterGraph = function (info) {
  *      If not specified, will default to "y".
  *  data: An array containing "data objects", saying where bars should be.
  *      A data object could be like this (if the x and y properties mentioned
- *      above are set to "age" and "height"):
+ *      above are set to "person" and "cakes"):
  *      {person: 'Bob', cakes: 7}
  */
 Graph.prototype.drawBarChart = function (info) {
@@ -453,7 +453,7 @@ Graph.prototype.drawBarChart = function (info) {
  *      objects). If not specified, will default to "y".
  *  data: An array containing "data objects", saying where bars should be.
  *      A data object could be like this (if the dataName and dataData
- *      properties mentioned above are set to "age" and "height"):
+ *      properties mentioned above are set to "person" and "cakes"):
  *      {person: 'Bob', cakes: 7}
  */
 Graph.prototype.drawPieChart = function (info) {
