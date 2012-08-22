@@ -3,7 +3,9 @@ var el = document.getElementById('graph1'),
 
 graph.attr({
 	pointOpacity: 0.9,
-	pointRadius: 3
+	pointRadius: 3,
+	showGrid: true,
+	gridLineColor: 'red'
 });
 graph.draw({
 	type: 'line',
@@ -66,7 +68,8 @@ graph.attr({
 	pointRadius: function (y, maxY) {
 		return 15 / maxY * y + 2;
 	},
-	textPosition: 'center'
+	textPosition: 'center',
+	showGrid: true
 });
 graph.draw({
 	type: 'scatter',

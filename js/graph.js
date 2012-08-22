@@ -25,6 +25,8 @@ function Graph(element, width, height) {
 		barColor: 'red', // Colour of bars (can be a function)
 		barHoverColor: 'darkgray',
 		barOpacity: 1, // Opacity of bars
+		gridLineWidth: 1, // Width of grid line in pixels
+		gridLineColor: 'lightgray', // Color of grid line
 		pointColor: 'red', // Colour of points
 		pointHoverColor: 'darkred', // Colour of points on hover
 		pointOpacity: 1, // Opacity of point
@@ -32,6 +34,7 @@ function Graph(element, width, height) {
 		lineColor: 'black', // Colour of lines
 		lineOpacity: 1, // Opacity of line
 		lineWidth: 1, // Width of line in pixels
+		showGrid: false, // Whether to show the grid-thing or not
 		textPosition: 'right' // Position of text (left, right, center)
 	};
 
@@ -167,7 +170,8 @@ Graph.prototype.drawScatterGraph = function (info) {
 	var paper = this.paper,
 		height = this.height,
 		width = this.width,
-		perc5, maxX, maxY, minX, minY, x, y;
+		attr, graphX, graphY, perc5, maxX, maxY, minX, minY, mousein,
+		mousemoveHandler, mouseoutHandler, x, y;
 
 	x = info.x || 'x';
 	y = info.y || 'y';
@@ -247,6 +251,53 @@ Graph.prototype.drawScatterGraph = function (info) {
 			this.setText(info.title);
 		}, this);
 	}, this);
+
+	if (this.getAttr('showGrid')) {
+		graphX = paper.path('M0 0l0 0').toBack().hide();
+		graphY = paper.path('M0 0l0 0').toBack().hide();
+
+		attr = {
+			'stroke-width': this.getAttr('gridLineWidth'),
+			'stroke': this.getAttr('gridLineColor')
+		};
+		graphX.attr(attr);
+		graphY.attr(attr);
+
+		mousein = false;
+
+		mousemoveHandler = function (e) {
+			var x = e.offsetX;
+			var y = e.offsetY;
+
+			graphX.attr('path', 'M0 ' + y + 'l' + width + ' 0');
+			graphY.attr('path', 'M' + x + ' 0' + 'l0' + ' ' + height);
+
+			if (!mousein) {
+				graphX.show().toBack();
+				graphY.show().toBack();
+
+				mousein = true;
+			}
+		};
+
+		mouseoutHandler = function (e) {
+			// TODO: Fix this
+			if (false) {
+				mousein = false;
+
+				graphX.hide();
+				graphY.hide();
+			}
+		};
+
+		if (this.element.addEventListener) {
+			this.element.addEventListener('mousemove', mousemoveHandler);
+			this.element.addEventListener('mouseout', mouseoutHandler);
+		} else {
+			this.element.attachEvent('onmousemove', mousemoveHandler);
+			this.element.attachEvent('onmouseout', mouseoutHandler);
+		}
+	}
 };
 
 /**
