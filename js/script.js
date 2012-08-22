@@ -69,7 +69,8 @@ graph.attr({
 		return 15 / maxY * y + 2;
 	},
 	textPosition: 'center',
-	showGrid: true
+	showGrid: true,
+	cursor: 'pointer'
 });
 graph.draw({
 	type: 'scatter',

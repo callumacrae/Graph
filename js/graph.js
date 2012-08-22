@@ -25,6 +25,7 @@ function Graph(element, width, height) {
 		barColor: 'red', // Colour of bars (can be a function)
 		barHoverColor: 'darkgray',
 		barOpacity: 1, // Opacity of bars
+		cursor: 'default', // Cursor (default "default")
 		gridLineWidth: 1, // Width of grid line in pixels
 		gridLineColor: 'lightgray', // Color of grid line
 		pointColor: 'red', // Colour of points
@@ -66,6 +67,8 @@ GraphError.prototype.constructor = GraphError;
  *  should contain.
  */
 Graph.prototype.draw = function (info) {
+	var cursor;
+
 	switch (info.type) {
 		case 'bar':
 			this.drawBarChart(info);
@@ -86,6 +89,13 @@ Graph.prototype.draw = function (info) {
 	}
 
 	this.setText(info.title);
+
+	var cursor = this.getAttr('cursor');
+	if (cursor === 'default' && this.getAttr('showGrid')) {
+		this.element.style.cursor = 'none';
+	} else if (cursor !== 'default') {
+		this.element.style.cursor = cursor;
+	}
 };
 
 /**
