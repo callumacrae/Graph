@@ -158,6 +158,32 @@ el = document.getElementById('graph6');
 graph = new Graph(el, 300, 200);
 
 graph.attr({
+	barColor: function (height, maxHeight) {
+		var red = Math.round(255 - 255 / maxHeight * height).toString(16);
+		if (red.length === 1) {
+			red = '0' + red;
+		}
+		return '#ff' + red + red;
+	},
+	direction: 'horizontal'
+});
+graph.draw({
+	type: 'bar',
+	title: 'Horizontal bar chart',
+	x: 'person',
+	y: 'spoons',
+	data: [
+		{person: 'Bob', spoons: 2},
+		{person: 'Mary', spoons: 6},
+		{person: 'Sam', spoons: 3}
+	]
+});
+
+
+el = document.getElementById('graph7');
+graph = new Graph(el, 300, 200);
+
+graph.attr({
 	segmentColor: function (data, maxData) {
 		var red = Math.round(255 - 255 / maxData * data).toString(16);
 		if (red.length === 1) {

@@ -28,6 +28,7 @@ function Graph(element, width, height) {
 		barHoverColor: 'darkgray',
 		barOpacity: 1, // Opacity of bars
 		cursor: 'default', // Cursor (default "default")
+		direction: 'vertical', // Direction of bars in bar chart
 		gridLineWidth: 1, // Width of grid line in pixels
 		gridLineColor: 'gray', // Color of grid line
 		gridLineOpacity: 0.8, // Opacity of grid line
@@ -378,7 +379,7 @@ Graph.prototype.drawBarChart = function (info) {
 	var paper = this.paper,
 		height = this.height,
 		width = this.width,
-		barWidth, length, maxY, x, y;
+		barWidth, length, maxY, tmp, x, y;
 
 	x = info.x || 'x';
 	y = info.y || 'y';
@@ -396,6 +397,12 @@ Graph.prototype.drawBarChart = function (info) {
 	});
 	maxY *= 1.05;
 
+	if (this.getAttr('direction') === 'horizontal') {
+		tmp = width;
+		width = height;
+		height = tmp;
+	}
+
 	length = info.data.length;
 	barWidth = width / length * 0.8;
 
@@ -410,15 +417,28 @@ Graph.prototype.drawBarChart = function (info) {
 		point.barHeight = height - point.ypos - 1;
 
 		if (animate === 'none') {
-			bar = paper.rect(point.xpos, point.ypos, barWidth, point.barHeight);
+			if (this.getAttr('direction') === 'horizontal') {
+				bar = paper.rect(5, point.xpos, point.barHeight, barWidth);
+			} else {
+				bar = paper.rect(point.xpos, point.ypos, barWidth, point.barHeight);
+			}
 		} else {
-			bar = paper.rect(point.xpos, point.ypos + point.barHeight, barWidth, 0);
-			setTimeout(function () {
-				bar.animate({
-					y: point.ypos,
-					height: point.barHeight
-				}, animateTime, animate);
-			}, index * animateTime / 10)
+			if (this.getAttr('direction') === 'horizontal') {
+				bar = paper.rect(5, point.xpos, 0, barWidth);
+				setTimeout(function () {
+					bar.animate({
+						width: point.barHeight
+					}, animateTime, animate);
+				}, index * animateTime / 10);
+			} else {
+				bar = paper.rect(point.xpos, point.ypos + point.barHeight, barWidth, 0);
+				setTimeout(function () {
+					bar.animate({
+						y: point.ypos,
+						height: point.barHeight
+					}, animateTime, animate);
+				}, index * animateTime / 10);
+			}
 		}
 		color = this.getAttr('barColor', [point[y], maxY]);
 
