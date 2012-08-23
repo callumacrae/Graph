@@ -82,6 +82,7 @@ Graph.prototype.draw = function (info) {
 		this.attr(info.attrs);
 	}
 
+
 	this.info = info;
 
 	switch (info.type) {
@@ -375,6 +376,16 @@ Graph.prototype.drawScatterGraph = function (info) {
 			this.element.attachEvent('onmousemove', mousemoveHandler);
 			document.attachEvent('onmousemove', mouseoutHandler);
 		}
+
+		this._removeListeners = function () {
+			if (this.element.removeEventListener) {
+				this.element.removeEventListener('mousemove', mousemoveHandler);
+				document.removeEventListener('mousemove', mouseoutHandler);
+			} else {
+				this.element.detachEvent('onmousemove', mousemoveHandler);
+				document.detachEvent('onmousemove', mouseoutHandler);
+			}
+		};
 	}
 };
 
@@ -664,7 +675,7 @@ Graph.prototype.attr = function (name, value) {
 
 	if (typeof name === 'object') {
 		this.each(name, function (attr, value) {
-			this.attr(attr, value);
+		this.attr(attr, value);;
 		});
 	} else if (typeof value === 'undefined' || this.isArray(value)) {
 		if (typeof attrs[name] === 'function') {
@@ -673,12 +684,49 @@ Graph.prototype.attr = function (name, value) {
 			return attrs[name];
 		}
 	} else {
-		attrs[name] = value;
+		attrs[name] = value
 
 		if (name === 'title') {
 			this.info.title = value;
 			this.setText(value);
 		}
+	}
+
+	return this;
+};
+
+/**
+ * Redraws graph. Deleted old information and starts again.
+ *
+ * @param {object} info New info (optional).
+ */
+Graph.prototype.redraw = function (info) {
+	this.paper.clear();
+	if (this._removeListeners) {
+		this._removeListeners();
+		delete this._removeListeners;
+	}
+	this.draw(typeof info === 'object' ? info : this.info);
+
+	return this;
+};
+
+/**
+ * When the graph is clicked, fires callback function.
+ *
+ * @param {function} fn Function to use as callback.
+ */
+Graph.prototype.click = function (fn) {
+	var that = this;
+
+	if (document.addEventListener) {
+		this.element.addEventListener('click', function () {
+			fn.call(that);
+		});
+	} else {
+		this.element.attachEvent('onclick', function () {
+			fn.call(that);
+		});
 	}
 
 	return this;

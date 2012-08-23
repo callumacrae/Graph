@@ -26,6 +26,10 @@ graph.draw({
 	}
 });
 
+graph.click(function () {
+	this.redraw();
+});
+
 
 el = document.getElementById('graph2');
 graph = new Graph(el, 300, 200);
@@ -59,6 +63,10 @@ graph.draw({
 	]
 });
 
+graph.click(function () {
+	this.redraw();
+});
+
 
 el = document.getElementById('graph3');
 graph = new Graph(el, 300, 200);
@@ -86,6 +94,10 @@ graph.draw({
 		{day: 9, spoons: 8},
 		{day: 10, spoons: 7}
 	]
+});
+
+graph.click(function () {
+	this.redraw();
 });
 
 
@@ -122,6 +134,10 @@ graph.draw({
 	]
 });
 
+graph.click(function () {
+	this.redraw();
+});
+
 
 el = document.getElementById('graph5');
 graph = new Graph(el, 300, 200);
@@ -153,6 +169,10 @@ graph.draw({
 	]
 });
 
+graph.click(function () {
+	this.redraw();
+});
+
 
 el = document.getElementById('graph6');
 graph = new Graph(el, 300, 200);
@@ -178,6 +198,10 @@ graph.draw({
 		{person: 'Sam', spoons: 3},
 		{person: 'Callum', spoons: 4.5}
 	]
+});
+
+graph.click(function () {
+	this.redraw();
 });
 
 
@@ -209,4 +233,8 @@ graph.draw({
 		{day: 'Thursday', spoons: 1},
 		{day: 'Friday', spoons: 5}
 	]
+});
+
+graph.click(function () {
+	this.redraw();
 });
