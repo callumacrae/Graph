@@ -102,15 +102,8 @@ Graph.prototype.draw = function (info, originalData) {
 
 		this.get(info.data.url, info.data.data, function (body) {
 			var originalData = info.data;
-
-			if (typeof body === 'object') {
-				info.data = body;
-			} else {
-				info.data = JSON.parse(body);
-			}
-
+			info.data = (typeof body === 'object') ? body : JSON.parse(body);
 			that.paper.clear();
-
 			that.draw(info, originalData);
 		});
 
