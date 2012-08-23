@@ -330,17 +330,20 @@ Graph.prototype.drawScatterGraph = function (info) {
 				target = e.target ? e.target : e.srcElement;
 
 			if (target.tagName === 'tspan') {
-				return;
-			}
+				mousein = false;
 
-			graphX.attr('path', 'M0 ' + y + 'l' + width + ' 0');
-			graphY.attr('path', 'M' + x + ' 0' + 'l0' + ' ' + height);
+				graphX.hide();
+				graphY.hide();
+			} else {
+				graphX.attr('path', 'M0 ' + y + 'l' + width + ' 0');
+				graphY.attr('path', 'M' + x + ' 0' + 'l0' + ' ' + height);
 
-			if (!mousein) {
-				graphX.show().toBack();
-				graphY.show().toBack();
+				if (!mousein) {
+					graphX.show().toBack();
+					graphY.show().toBack();
 
-				mousein = true;
+					mousein = true;
+				}
 			}
 		};
 
