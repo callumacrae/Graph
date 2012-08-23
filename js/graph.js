@@ -582,7 +582,7 @@ Graph.prototype.setText = function (text) {
 
 	if (textPosition === 'center') {
 		this.textNode = tmpTextNode; // Not so tmp...
-		tmpTextNode[0].style.cursor = 'text';
+		tmpTextNode.attr('cursor', 'text');
 		return;
 	}
 
@@ -595,7 +595,7 @@ Graph.prototype.setText = function (text) {
 	}
 
 	this.textNode = this.paper.text(x, 15, text);
-	this.textNode[0].style.cursor = 'text';
+	this.textNode.attr('cursor', 'text');
 	this.textNode.toFront();
 };
 
