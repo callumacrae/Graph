@@ -7,6 +7,8 @@
  * @constructor
  */
 function Graph(element, width, height) {
+	"use strict";
+
 	// Optionally allow no new constructor
 	if (!(this instanceof Graph)) {
 		return new Graph(element, width, height);
@@ -60,7 +62,9 @@ function Graph(element, width, height) {
  * @param {string} message The error message.
  * @constructor
  */
-function GraphError(message){
+function GraphError(message) {
+	"use strict";
+
 	this.name = 'GraphError';
 	this.message = message;
 }
@@ -79,6 +83,8 @@ GraphError.prototype.constructor = GraphError;
  *  redrawing in case of AJAX data.
  */
 Graph.prototype.draw = function (info, originalData) {
+	"use strict";
+
 	var cursor, that;
 
 	this.setText(info.title);
@@ -133,7 +139,6 @@ Graph.prototype.draw = function (info, originalData) {
 		// Throw error if graph type does not exist
 		default:
 			throw new GraphError('Graph type does not exist');
-			break;
 	}
 
 	cursor = this.attr('cursor');
@@ -163,6 +168,8 @@ Graph.prototype.draw = function (info, originalData) {
  *      {age: 12, height: 145}
  */
 Graph.prototype.drawLineGraph = function (info) {
+	"use strict";
+
 	var line, prevX, prevY;
 
 	// Draw scatter graph
@@ -202,7 +209,7 @@ Graph.prototype.drawLineGraph = function (info) {
 			});
 			break;
 
-		case 'straight':
+		//case 'straight':
 		default:
 			this.each(info.data, function (point, i) {
 				if (i === 0) {
@@ -245,6 +252,8 @@ Graph.prototype.drawLineGraph = function (info) {
  *      {age: 12, height: 145}
  */
 Graph.prototype.drawScatterGraph = function (info) {
+	"use strict";
+
 	var element = this.element,
 		paper = this.paper,
 		height = this.height,
@@ -436,6 +445,8 @@ Graph.prototype.drawScatterGraph = function (info) {
  *      {person: 'Bob', cakes: 7}
  */
 Graph.prototype.drawBarChart = function (info) {
+	"use strict";
+
 	var paper = this.paper,
 		height = this.height,
 		width = this.width,
@@ -537,6 +548,8 @@ Graph.prototype.drawBarChart = function (info) {
  *      {person: 'Bob', cakes: 7}
  */
 Graph.prototype.drawPieChart = function (info) {
+	"use strict";
+
 	var paper = this.paper,
 		width = this.width,
 		height = this.height,
@@ -591,7 +604,7 @@ Graph.prototype.drawPieChart = function (info) {
 				segment.segment.animate({
 					path: line
 				}, animateTime, animate);
-			}, i * animateTime / 10)
+			}, i * animateTime / 10);
 		}
 
 		angle += degrees;
@@ -620,6 +633,8 @@ Graph.prototype.drawPieChart = function (info) {
  * @param {string} text The text to change to.
  */
 Graph.prototype.setText = function (text) {
+	"use strict";
+
 	var tmpTextNode = this.paper.text(this.width / 2, 15, text),
 		textWidth = tmpTextNode[0].clientWidth,
 		textPosition = this.attr('textPosition'),
@@ -657,6 +672,8 @@ Graph.prototype.setText = function (text) {
  * @param {function} cb Function to call on each item.
  */
 Graph.prototype.each = function (ary, cb, scope) {
+	"use strict";
+
 	if (typeof scope === 'undefined') {
 		scope = this;
 	}
@@ -685,6 +702,8 @@ Graph.prototype.each = function (ary, cb, scope) {
  * @return {boolean} Returns true if object is array.
  */
 Graph.prototype.isArray = function (value) {
+	"use strict";
+
 	return Object.prototype.toString.call(value) === '[object Array]';
 };
 
@@ -700,11 +719,13 @@ Graph.prototype.isArray = function (value) {
  *  to be used as arguments when attribute function is called.
  */
 Graph.prototype.attr = function (name, value) {
+	"use strict";
+
 	var attrs = this.attrs;
 
 	if (typeof name === 'object') {
 		this.each(name, function (attr, value) {
-		this.attr(attr, value);;
+		this.attr(attr, value);
 		});
 	} else if (typeof value === 'undefined' || this.isArray(value)) {
 		if (typeof attrs[name] === 'function') {
@@ -713,7 +734,7 @@ Graph.prototype.attr = function (name, value) {
 			return attrs[name];
 		}
 	} else {
-		attrs[name] = value
+		attrs[name] = value;
 
 		if (name === 'title') {
 			this.info.title = value;
@@ -730,6 +751,8 @@ Graph.prototype.attr = function (name, value) {
  * @param {object} info New info (optional).
  */
 Graph.prototype.redraw = function (info) {
+	"use strict";
+
 	this.paper.clear();
 	if (this._removeListeners) {
 		this._removeListeners();
@@ -753,6 +776,8 @@ Graph.prototype.redraw = function (info) {
  * @param {function} fn Function to use as callback.
  */
 Graph.prototype.click = function (fn) {
+	"use strict";
+
 	var that = this;
 
 	if (document.addEventListener) {
@@ -769,6 +794,8 @@ Graph.prototype.click = function (fn) {
 };
 
 Graph.prototype.request = function (method, url, data, callback) {
+	"use strict";
+
 	var req;
 
 	if (window.XMLHttpRequest) {
@@ -807,10 +834,14 @@ Graph.prototype.request = function (method, url, data, callback) {
 };
 
 Graph.prototype.get = function (url, data, callback) {
+	"use strict";
+
 	return this.request('GET', url, data, callback);
 };
 
 Graph.prototype.post = function (url, data, callback) {
+	"use strict";
+
 	return this.request('POST', url, data, callback);
 };
 
@@ -818,14 +849,16 @@ Graph.prototype.post = function (url, data, callback) {
 // If jQuery library is loaded, create a jQuery.fn.graph function.
 if (typeof jQuery !== 'undefined') {
 	/**
-	 * Turn element into a graph.
-	 *
-	 * @param {int} width Width of graph to create.
-	 * @param {int} height Height of graph to create.
-	 *
-	 * @return {Graph} The created graph.
-	 */
+	* Turn element into a graph.
+	*
+	* @param {int} width Width of graph to create.
+	* @param {int} height Height of graph to create.
+	*
+	* @return {Graph} The created graph.
+	*/
 	jQuery.fn.graph = function (width, height) {
+		"use strict";
+
 		return new Graph(this[0], width, height);
 	};
 }
