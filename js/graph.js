@@ -21,6 +21,7 @@ function Graph(element, width, height) {
 
 	// Attributes to be set by .attr
 	this.attrs = {
+		ajaxLoading: true, // Display a loading sign when waiting for AJAX?
 		animate: 'none', // Animation. none / bounce / linear
 		animateTime: 1000, // Animation time in ms
 		barBorderColor: 'black',
@@ -80,6 +81,8 @@ GraphError.prototype.constructor = GraphError;
 Graph.prototype.draw = function (info, originalData) {
 	var cursor, that;
 
+	this.setText(info.title);
+
 	if (typeof info.attrs === 'object') {
 		this.attr(info.attrs);
 	}
@@ -90,9 +93,12 @@ Graph.prototype.draw = function (info, originalData) {
 		};
 	}
 
-
 	if (!this.isArray(info.data)) {
 		that = this;
+
+		if (this.attr('ajaxLoading')) {
+			// TODO: Put loading thingy here
+		}
 
 		this.get(info.data.url, info.data.data, function (body) {
 			var originalData = info.data;
@@ -102,6 +108,8 @@ Graph.prototype.draw = function (info, originalData) {
 			} else {
 				info.data = JSON.parse(body);
 			}
+
+			that.paper.clear();
 
 			that.draw(info, originalData);
 		});
@@ -134,8 +142,6 @@ Graph.prototype.draw = function (info, originalData) {
 			throw new GraphError('Graph type does not exist');
 			break;
 	}
-
-	this.setText(info.title);
 
 	cursor = this.attr('cursor');
 	if (cursor === 'default' && this.attr('showGrid')) {

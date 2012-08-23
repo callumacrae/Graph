@@ -248,7 +248,7 @@ graph.draw({
 	title: 'AJAX scatter graph',
 	data: './demo_php',
 	attrs: {
-		pointRadius: 3
+		pointRadius: 2
 	}
 });
 

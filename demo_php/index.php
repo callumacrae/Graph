@@ -12,4 +12,6 @@ while (rand(0, 20) > 1 || $i++ < 2) {
 	);
 }
 
+sleep(1);
+
 echo json_encode($data);
