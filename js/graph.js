@@ -212,7 +212,8 @@ Graph.prototype.drawLineGraph = function (info) {
  *      {age: 12, height: 145}
  */
 Graph.prototype.drawScatterGraph = function (info) {
-	var paper = this.paper,
+	var element = this.element,
+		paper = this.paper,
 		height = this.height,
 		width = this.width,
 		attr, graphX, graphY, perc5, maxX, maxY, minX, minY, mousein,
@@ -262,13 +263,13 @@ Graph.prototype.drawScatterGraph = function (info) {
 		point.ypos = height / (maxY - minY) * (maxY - point[y]);
 
 		var attrArgs = [{
-			x: point[x],
-			minX: minX,
-			maxX: maxX,
-			y: point[y],
-			minY: minY,
-			maxY: maxY
-		}],
+				x: point[x],
+				minX: minX,
+				maxX: maxX,
+				y: point[y],
+				minY: minY,
+				maxY: maxY
+			}],
 			color = this.attr('pointColor', attrArgs),
 			radius = this.attr('pointRadius', [point[y], maxY]),
 			animate = this.attr('animate'),
@@ -324,8 +325,13 @@ Graph.prototype.drawScatterGraph = function (info) {
 		mousein = false;
 
 		mousemoveHandler = function (e) {
-			var x = e.offsetX;
-			var y = e.offsetY;
+			var x = e.offsetX,
+				y = e.offsetY,
+				target = e.target ? e.target : e.srcElement;
+
+			if (target.tagName === 'tspan') {
+				return;
+			}
 
 			graphX.attr('path', 'M0 ' + y + 'l' + width + ' 0');
 			graphY.attr('path', 'M' + x + ' 0' + 'l0' + ' ' + height);
@@ -339,8 +345,13 @@ Graph.prototype.drawScatterGraph = function (info) {
 		};
 
 		mouseoutHandler = function (e) {
-			// TODO: Fix this
-			if (false) {
+			var x = e.offsetX,
+				y = e.offsetY;
+
+			if (mousein && (x < element.offsetLeft ||
+				x > element.offsetLeft + element.clientWidth ||
+				y < element.offsetTop ||
+				y > element.offsetTop + element.clientHeight)) {
 				mousein = false;
 
 				graphX.hide();
@@ -350,10 +361,10 @@ Graph.prototype.drawScatterGraph = function (info) {
 
 		if (this.element.addEventListener) {
 			this.element.addEventListener('mousemove', mousemoveHandler);
-			this.element.addEventListener('mouseout', mouseoutHandler);
+			document.addEventListener('mousemove', mouseoutHandler);
 		} else {
 			this.element.attachEvent('onmousemove', mousemoveHandler);
-			this.element.attachEvent('onmouseout', mouseoutHandler);
+			document.attachEvent('onmousemove', mouseoutHandler);
 		}
 	}
 };
@@ -571,6 +582,7 @@ Graph.prototype.setText = function (text) {
 
 	if (textPosition === 'center') {
 		this.textNode = tmpTextNode; // Not so tmp...
+		tmpTextNode[0].style.cursor = 'text';
 		return;
 	}
 
@@ -583,6 +595,7 @@ Graph.prototype.setText = function (text) {
 	}
 
 	this.textNode = this.paper.text(x, 15, text);
+	this.textNode[0].style.cursor = 'text';
 	this.textNode.toFront();
 };
 
@@ -590,7 +603,7 @@ Graph.prototype.setText = function (text) {
  * Internal function for looping through arrays and objects.
  *
  * @private
- * 
+ *
  * @param {Array|object} ary Array or object to loop through.
  * @param {function} cb Function to call on each item.
  */
@@ -610,7 +623,7 @@ Graph.prototype.each = function (ary, cb, scope) {
 			}
 		}
 	}
-	
+
 	return this;
 };
 
