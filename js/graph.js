@@ -236,24 +236,27 @@ Graph.prototype.drawScatterGraph = function (info) {
 	maxX = minX = info.data[0][x];
 	maxY = minY = info.data[0][y];
 
-	// Sort the data - first by x, then by y. Also get minX, maxY, etc.
+	// Sort the data - first by x, then by y
 	info.data.sort(function (a, b) {
-		if (a[x] > maxX) {
-			maxX = a[x];
-		} else if (a[x] < minX) {
-			minX = a[x];
-		}
-
-		if (a[y] > maxY) {
-			maxY = a[y];
-		} else if (a[y] < minY) {
-			minY = a[y];
-		}
-
 		if (a[x] === b[x]) {
 			return a[y] - b[y];
 		}
 		return a[x] - b[x];
+	});
+
+	// Get minY, maxX, etc.
+	this.each(info.data, function (point) {
+		if (point[x] > maxX) {
+			maxX = point[x];
+		} else if (point[x] < minX) {
+			minX = point[x];
+		}
+
+		if (point[y] > maxY) {
+			maxY = point[y];
+		} else if (point[y] < minY) {
+			minY = point[y];
+		}
 	});
 
 	// Increase minX, maxY, etc. by 5%
