@@ -78,6 +78,12 @@ GraphError.prototype.constructor = GraphError;
 Graph.prototype.draw = function (info) {
 	var cursor;
 
+	if (typeof info.attrs === 'object') {
+		this.attr(info.attrs);
+	}
+
+	this.info = info;
+
 	switch (info.type) {
 		case 'bar':
 			this.drawBarChart(info);
@@ -658,7 +664,7 @@ Graph.prototype.attr = function (name, value) {
 
 	if (typeof name === 'object') {
 		this.each(name, function (attr, value) {
-			attrs[attr] = value;
+			this.attr(attr, value);
 		});
 	} else if (typeof value === 'undefined' || this.isArray(value)) {
 		if (typeof attrs[name] === 'function') {
@@ -668,6 +674,11 @@ Graph.prototype.attr = function (name, value) {
 		}
 	} else {
 		attrs[name] = value;
+
+		if (name === 'title') {
+			this.info.title = value;
+			this.setText(value);
+		}
 	}
 
 	return this;

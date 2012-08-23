@@ -1,12 +1,6 @@
 var el = document.getElementById('graph1'),
 	graph = new Graph(el, 300, 200);
 
-graph.attr({
-	pointOpacity: 0.9,
-	pointRadius: 3,
-	showGrid: true,
-	gridLineColor: 'red'
-});
 graph.draw({
 	type: 'line',
 	title: 'Straight line graph',
@@ -23,7 +17,13 @@ graph.draw({
 		{day: 7, spoons: 6},
 		{day: 8, spoons: 4},
 		{day: 9, spoons: 3}
-	]
+	],
+	attrs: {
+		pointOpacity: 0.9,
+		pointRadius: 3,
+		showGrid: true,
+		gridLineColor: 'red'
+	}
 });
 
 
