@@ -74,16 +74,43 @@ GraphError.prototype.constructor = GraphError;
  *  property containing the title of the graph. See the relevant function below
  *  (eg .drawLineGraph for line graphs) to see what other properties the object
  *  should contain.
+ *  @param {object} originalData Original data. Used internally, and only for
+ *  redrawing in case of AJAX data.
  */
-Graph.prototype.draw = function (info) {
-	var cursor;
+Graph.prototype.draw = function (info, originalData) {
+	var cursor, that;
 
 	if (typeof info.attrs === 'object') {
 		this.attr(info.attrs);
 	}
 
+	if (typeof info.data === 'string') {
+		info.data = {
+			url: info.data
+		};
+	}
+
+
+	if (!this.isArray(info.data)) {
+		that = this;
+
+		this.get(info.data.url, info.data.data, function (body) {
+			var originalData = info.data;
+
+			if (typeof body === 'object') {
+				info.data = body;
+			} else {
+				info.data = JSON.parse(body);
+			}
+
+			that.draw(info, originalData);
+		});
+
+		return;
+	}
 
 	this.info = info;
+	this.originalData = originalData;
 
 	switch (info.type) {
 		case 'bar':
@@ -709,7 +736,14 @@ Graph.prototype.redraw = function (info) {
 		this._removeListeners();
 		delete this._removeListeners;
 	}
-	this.draw(typeof info === 'object' ? info : this.info);
+
+	if (typeof info !== 'object') {
+		info = this.info;
+		if (this.originalData) {
+			info.data = this.originalData;
+		}
+	}
+	this.draw(info);
 
 	return this;
 };
@@ -733,6 +767,52 @@ Graph.prototype.click = function (fn) {
 	}
 
 	return this;
+};
+
+Graph.prototype.request = function (method, url, data, callback) {
+	var req;
+
+	if (window.XMLHttpRequest) {
+		req = new XMLHttpRequest();
+	} else {
+		// Internet Explorer
+		req = new ActiveXObject('Microsoft.XMLHTTP');
+	}
+
+	if (method === 'GET' && typeof data === 'string' && data) {
+		url += '?' + data;
+	}
+
+	req.open(method, url, true);
+
+	if (method === 'POST' && typeof data === 'string') {
+		req.setRequestHeader('Content-type',
+			'application/x-www-form-urlencoded');
+	}
+
+	req.onreadystatechange = function () {
+		if (req.readyState === 4 && req.status === 200) {
+			var contentType = req.getResponseHeader('Content-type');
+			if (contentType === 'application/json') {
+				callback(JSON.parse(req.responseText));
+			} else {
+				callback(req.responseText);
+			}
+		} else if (req.readyState === 4) {
+			throw new Error('XHR Request failed: ' + req.status);
+		}
+	};
+	req.send((typeof data === 'string' && method === 'POST') ? data : null);
+
+	return req;
+};
+
+Graph.prototype.get = function (url, data, callback) {
+	return this.request('GET', url, data, callback);
+};
+
+Graph.prototype.post = function (url, data, callback) {
+	return this.request('POST', url, data, callback);
 };
 
 

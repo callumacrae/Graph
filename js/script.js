@@ -238,3 +238,20 @@ graph.draw({
 graph.click(function () {
 	this.redraw();
 });
+
+
+el = document.getElementById('graph8');
+graph = new Graph(el, 300, 200);
+
+graph.draw({
+	type: 'scatter',
+	title: 'AJAX scatter graph',
+	data: './demo_php',
+	attrs: {
+		pointRadius: 3
+	}
+});
+
+graph.click(function () {
+	this.redraw();
+});
