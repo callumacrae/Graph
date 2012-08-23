@@ -103,8 +103,8 @@ Graph.prototype.draw = function (info) {
 
 	this.setText(info.title);
 
-	cursor = this.getAttr('cursor');
-	if (cursor === 'default' && this.getAttr('showGrid')) {
+	cursor = this.attr('cursor');
+	if (cursor === 'default' && this.attr('showGrid')) {
 		this.element.style.cursor = 'none';
 	} else if (cursor !== 'default') {
 		this.element.style.cursor = cursor;
@@ -187,9 +187,9 @@ Graph.prototype.drawLineGraph = function (info) {
 	// Cases that do not want this should return
 	this.path = this.paper.path(line);
 	this.path.attr({
-		'stroke': this.getAttr('lineColor'),
-		'stroke-opacity': this.getAttr('lineOpacity'),
-		'stroke-width': this.getAttr('lineWidth')
+		'stroke': this.attr('lineColor'),
+		'stroke-opacity': this.attr('lineOpacity'),
+		'stroke-width': this.attr('lineWidth')
 	});
 	this.path.toBack();
 };
@@ -269,10 +269,10 @@ Graph.prototype.drawScatterGraph = function (info) {
 			minY: minY,
 			maxY: maxY
 		}],
-			color = this.getAttr('pointColor', attrArgs),
-			radius = this.getAttr('pointRadius', [point[y], maxY]),
-			animate = this.getAttr('animate'),
-			animateTime = this.getAttr('animateTime', [i]);
+			color = this.attr('pointColor', attrArgs),
+			radius = this.attr('pointRadius', [point[y], maxY]),
+			animate = this.attr('animate'),
+			animateTime = this.attr('animateTime', [i]);
 
 		if (animate !== 'none') {
 			point.point = paper.circle(point.xpos, point.ypos, 0);
@@ -288,18 +288,18 @@ Graph.prototype.drawScatterGraph = function (info) {
 		point.point.attr({
 			fill: color,
 			stroke: color,
-			opacity: this.getAttr('pointOpacity', attrArgs)
+			opacity: this.attr('pointOpacity', attrArgs)
 		});
 
 		point.point.hover(function () {
-			var hoverColor = this.getAttr('pointHoverColor', attrArgs);
+			var hoverColor = this.attr('pointHoverColor', attrArgs);
 			if (hoverColor) {
 				point.point.attr({
 					fill: hoverColor,
 					stroke: hoverColor
 				});
 			}
-			this.setText(this.getAttr('hoverText', [point, x, y]));
+			this.setText(this.attr('hoverText', [point, x, y]));
 		}, function () {
 			point.point.attr({
 				fill: color,
@@ -309,14 +309,14 @@ Graph.prototype.drawScatterGraph = function (info) {
 		}, this);
 	}, this);
 
-	if (this.getAttr('showGrid')) {
+	if (this.attr('showGrid')) {
 		graphX = paper.path('M0 0l0 0').toBack().hide();
 		graphY = paper.path('M0 0l0 0').toBack().hide();
 
 		attr = {
-			'opacity': this.getAttr('gridLineOpacity'),
-			'stroke-width': this.getAttr('gridLineWidth'),
-			'stroke': this.getAttr('gridLineColor')
+			'opacity': this.attr('gridLineOpacity'),
+			'stroke-width': this.attr('gridLineWidth'),
+			'stroke': this.attr('gridLineColor')
 		};
 		graphX.attr(attr);
 		graphY.attr(attr);
@@ -397,7 +397,7 @@ Graph.prototype.drawBarChart = function (info) {
 	});
 	maxY *= 1.05;
 
-	if (this.getAttr('direction') === 'horizontal') {
+	if (this.attr('direction') === 'horizontal') {
 		tmp = width;
 		width = height;
 		height = tmp;
@@ -408,8 +408,8 @@ Graph.prototype.drawBarChart = function (info) {
 
 	// Draw the bars
 	this.each(info.data, function (point, index) {
-		var animate = this.getAttr('animate'),
-			animateTime = this.getAttr('animateTime'),
+		var animate = this.attr('animate'),
+			animateTime = this.attr('animateTime'),
 			bar, color;
 
 		point.xpos = width / length * (index + 0.1);
@@ -417,13 +417,13 @@ Graph.prototype.drawBarChart = function (info) {
 		point.barHeight = height - point.ypos - 1;
 
 		if (animate === 'none') {
-			if (this.getAttr('direction') === 'horizontal') {
+			if (this.attr('direction') === 'horizontal') {
 				bar = paper.rect(5, point.xpos, point.barHeight, barWidth);
 			} else {
 				bar = paper.rect(point.xpos, point.ypos, barWidth, point.barHeight);
 			}
 		} else {
-			if (this.getAttr('direction') === 'horizontal') {
+			if (this.attr('direction') === 'horizontal') {
 				bar = paper.rect(5, point.xpos, 0, barWidth);
 				setTimeout(function () {
 					bar.animate({
@@ -440,18 +440,18 @@ Graph.prototype.drawBarChart = function (info) {
 				}, index * animateTime / 10);
 			}
 		}
-		color = this.getAttr('barColor', [point[y], maxY]);
+		color = this.attr('barColor', [point[y], maxY]);
 
 		point.bar = bar;
 		bar.attr({
-			'stroke': this.getAttr('barBorderColor', [point[y], maxY]),
+			'stroke': this.attr('barBorderColor', [point[y], maxY]),
 			'fill': color,
-			'opacity': this.getAttr('barOpacity', [point[y], maxY])
+			'opacity': this.attr('barOpacity', [point[y], maxY])
 		});
 
 		bar.hover(function () {
-			bar.attr('fill', this.getAttr('barHoverColor', [point[y], maxY]));
-			this.setText(this.getAttr('hoverText', [point, x, y]));
+			bar.attr('fill', this.attr('barHoverColor', [point[y], maxY]));
+			this.setText(this.attr('hoverText', [point, x, y]));
 		}, function () {
 			bar.attr('fill', color);
 			this.setText(info.title);
@@ -511,12 +511,12 @@ Graph.prototype.drawPieChart = function (info) {
 	this.each(info.data, function (segment, i) {
 		var degrees = 360 / totalData * segment[data],
 			args = [segment[data], maxData],
-			borderColor = this.getAttr('segmentBorderColor', args),
-			color = this.getAttr('segmentColor', args),
-			radius = this.getAttr('segmentRadius', args),
-			opacity = this.getAttr('segmentOpacity', args),
-			animate = this.getAttr('animate'),
-			animateTime = this.getAttr('animateTime'),
+			borderColor = this.attr('segmentBorderColor', args),
+			color = this.attr('segmentColor', args),
+			radius = this.attr('segmentRadius', args),
+			opacity = this.attr('segmentOpacity', args),
+			animate = this.attr('animate'),
+			animateTime = this.attr('animateTime'),
 			line;
 
 		if (animate === 'none') {
@@ -544,9 +544,9 @@ Graph.prototype.drawPieChart = function (info) {
 
 		segment.segment.hover(function () {
 			segment.segment.attr({
-				fill: this.getAttr('segmentHoverColor', args)
+				fill: this.attr('segmentHoverColor', args)
 			});
-			this.setText(this.getAttr('hoverText', [segment, name, data]));
+			this.setText(this.attr('hoverText', [segment, name, data]));
 		}, function () {
 			segment.segment.attr('fill', color);
 			this.setText(info.title);
@@ -562,7 +562,7 @@ Graph.prototype.drawPieChart = function (info) {
 Graph.prototype.setText = function (text) {
 	var tmpTextNode = this.paper.text(this.width / 2, 15, text),
 		textWidth = tmpTextNode[0].clientWidth,
-		textPosition = this.getAttr('textPosition'),
+		textPosition = this.attr('textPosition'),
 		x;
 
 	if (typeof this.textNode !== 'undefined') {
@@ -627,12 +627,15 @@ Graph.prototype.isArray = function (value) {
 };
 
 /**
- * Set graph attributes. Accepts either two arguments (name and value, sets
- * name attribute to value), or an object of attributes to set.
+ * Set or get graph attributes. Accepts either two arguments (name and value,
+ * sets name attribute to value), or an object of attributes to set. You can
+ * also use it to retrieve an attribute (mostly for internal usage only). If
+ * value is undefined or an array, then it will get the attribute.
  *
  * @param {object|string} name Either name of attribute to set, or object of
  *  attributes to cycle through.
- * @param value If name is string, name attribute will be set to this.
+ * @param {string|int|Array} value Value to set name attribute to, or array
+ *  to be used as arguments when attribute function is called.
  */
 Graph.prototype.attr = function (name, value) {
 	var attrs = this.attrs;
@@ -641,30 +644,17 @@ Graph.prototype.attr = function (name, value) {
 		this.each(name, function (attr, value) {
 			attrs[attr] = value;
 		});
+	} else if (typeof value === 'undefined' || this.isArray(value)) {
+		if (typeof attrs[name] === 'function') {
+			return attrs[name].apply(null, value);
+		} else {
+			return attrs[name];
+		}
 	} else {
 		attrs[name] = value;
 	}
 
 	return this;
-};
-
-/**
- * Get attribute for internal usage. If it is a function, it will be evaluated
- * and the result returned, else the attribute will be returned.
- *
- * @private
- *
- * @param {string} name The name of the attribute.
- * @param {Array} data Data to be given to the attribute if it is a function.
- *
- * @return {*} Usually a string or a number.
- */
-Graph.prototype.getAttr = function (name, data) {
-	if (typeof this.attrs[name] === 'function') {
-		return this.attrs[name].apply(null, data);
-	} else {
-		return this.attrs[name];
-	}
 };
 
 
