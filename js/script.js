@@ -74,7 +74,9 @@ graph = new Graph(el, 300, 200);
 graph.attr({
 	pointRadius: 4,
 	textPosition: 'left',
-	lineWidth: 2
+	lineWidth: 2,
+	animate: 'bounce',
+	animateTime: 1000
 });
 graph.draw({
 	type: 'line',
@@ -248,7 +250,8 @@ graph.draw({
 	title: 'AJAX scatter graph',
 	data: './demo_php',
 	attrs: {
-		pointRadius: 2
+		pointRadius: 2,
+		showGrid: true
 	}
 });
 

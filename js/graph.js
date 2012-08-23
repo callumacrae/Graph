@@ -97,7 +97,7 @@ Graph.prototype.draw = function (info, originalData) {
 		that = this;
 
 		if (this.attr('ajaxLoading')) {
-			// TODO: Put loading thingy here
+			this.paper.text(this.width / 2, this.height / 2, 'Loading...');
 		}
 
 		this.get(info.data.url, info.data.data, function (body) {
