@@ -163,6 +163,109 @@ Graph.prototype.draw = function (info, originalData) {
 };
 
 /**
+ * Draws a bar chart. This is an internal function to get rid of some
+ * indentation that would be required if it were in the above switch statement,
+ * but is still useful for the documentation below.
+ *
+ * @private
+ *
+ * @param {object} info Object containing the following properties:
+ *  x: The name of the data on the x axis (will be used in the data objects).
+ *      If not specified, will default to "x".
+ *  y: The name of the data on the y axis (will be used in the data objects).
+ *      If not specified, will default to "y".
+ *  data: An array containing "data objects", saying where bars should be.
+ *      A data object could be like this (if the x and y properties mentioned
+ *      above are set to "person" and "cakes"):
+ *      {person: 'Bob', cakes: 7}
+ */
+Graph.prototype.drawBarChart = function (info) {
+	"use strict";
+
+	var paper = this.paper,
+		height = this.height,
+		width = this.width,
+		barWidth, length, maxY, tmp, x, y;
+
+	x = info.x || 'x';
+	y = info.y || 'y';
+
+	if (x === 'xpos' || y === 'ypos') {
+		throw new GraphError('Cannot use xpos or ypos as x and y keys');
+	}
+
+	// Work out maxY and add 5%
+	maxY = info.data[0][y];
+	Graph.each(info.data, function (bar) {
+		if (bar[y] > maxY) {
+			maxY = bar[y];
+		}
+	});
+	maxY *= 1.05;
+
+	if (this.attr('direction') === 'horizontal') {
+		tmp = width;
+		width = height;
+		height = tmp;
+	}
+
+	length = info.data.length;
+	barWidth = width / length * 0.8;
+
+	// Draw the bars
+	Graph.each(info.data, function (point, index) {
+		var animate = this.attr('animate'),
+			animateTime = this.attr('animateTime'),
+			bar, color;
+
+		point.xpos = width / length * (index + 0.1);
+		point.ypos = (height - height / maxY * point[y] - 2);
+		point.barHeight = height - point.ypos - 1;
+
+		if (animate === 'none') {
+			if (this.attr('direction') === 'horizontal') {
+				bar = paper.rect(5, point.xpos, point.barHeight, barWidth);
+			} else {
+				bar = paper.rect(point.xpos, point.ypos, barWidth, point.barHeight);
+			}
+		} else {
+			if (this.attr('direction') === 'horizontal') {
+				bar = paper.rect(5, point.xpos, 0, barWidth);
+				setTimeout(function () {
+					bar.animate({
+						width: point.barHeight
+					}, animateTime, animate);
+				}, index * animateTime / 10);
+			} else {
+				bar = paper.rect(point.xpos, point.ypos + point.barHeight, barWidth, 0);
+				setTimeout(function () {
+					bar.animate({
+						y: point.ypos,
+						height: point.barHeight
+					}, animateTime, animate);
+				}, index * animateTime / 10);
+			}
+		}
+		color = this.attr('barColor', [point[y], maxY]);
+
+		point.bar = bar;
+		bar.attr({
+			'stroke': this.attr('barBorderColor', [point[y], maxY]),
+			'fill': color,
+			'opacity': this.attr('barOpacity', [point[y], maxY])
+		});
+
+		bar.hover(function () {
+			bar.attr('fill', this.attr('barHoverColor', [point[y], maxY]));
+			this.setText(this.attr('hoverText', [point, x, y]));
+		}, function () {
+			bar.attr('fill', color);
+			this.setText(info.title);
+		}, this);
+	}, this);
+};
+
+/**
  * Draws a line graph. This is an internal function to get rid of some
  * indentation that would be required if it were in the above switch statement,
  * but is still useful for the documentation below.
@@ -245,6 +348,103 @@ Graph.prototype.drawLineGraph = function (info) {
 		'stroke-width': this.attr('lineWidth')
 	});
 	this.path.toBack();
+};
+
+/**
+ * Draws a pie chart. This is an internal function to get rid of some
+ * indentation that would be required if it were in the above switch statement,
+ * but is still useful for the documentation below.
+ *
+ * @private
+ *
+ * @param {object} info Object containing the following properties:
+ *  dataName: The name of the data on the x axis (will be used in the data
+ *      objects). If not specified, will default to "x".
+ *  dataData: The name of the data on the y axis (will be used in the data
+ *      objects). If not specified, will default to "y".
+ *  data: An array containing "data objects", saying where bars should be.
+ *      A data object could be like this (if the dataName and dataData
+ *      properties mentioned above are set to "person" and "cakes"):
+ *      {person: 'Bob', cakes: 7}
+ */
+Graph.prototype.drawPieChart = function (info) {
+	"use strict";
+
+	var paper = this.paper,
+		width = this.width,
+		height = this.height,
+		angle = 0,
+		name, data, maxData, totalData;
+
+	name = info.dataName || 'name';
+	data = info.dataData || 'data';
+
+	// Work out maxData and totalData
+	maxData = info.data[0][data];
+	totalData = 0;
+	Graph.each(info.data, function (segment) {
+		totalData += segment[data];
+		if (segment[data] > maxData) {
+			maxData = segment[data];
+		}
+	});
+	maxData *= 1.05;
+
+	function sectorPath(cx, cy, r, startAngle, degrees) {
+		var rad = Math.PI / 180,
+			x1 = cx + r * Math.cos(-startAngle * rad),
+			x2 = cx + r * Math.cos(-(startAngle + degrees) * rad),
+			y1 = cy + r * Math.sin(-startAngle * rad),
+			y2 = cy + r * Math.sin(-(startAngle + degrees) * rad);
+		return ['M', cx, cy, 'L', x1, y1,
+			'A', r, r, 0, +(degrees > 180), 0, x2, y2, 'z'];
+	}
+
+	// Draw segments
+	Graph.each(info.data, function (segment, i) {
+		var degrees = 360 / totalData * segment[data],
+			args = [segment[data], maxData],
+			borderColor = this.attr('segmentBorderColor', args),
+			color = this.attr('segmentColor', args),
+			radius = this.attr('segmentRadius', args),
+			opacity = this.attr('segmentOpacity', args),
+			animate = this.attr('animate'),
+			animateTime = this.attr('animateTime'),
+			line;
+
+		if (animate === 'none') {
+			line = sectorPath(width / 2, height / 2, radius, angle, degrees);
+			segment.segment = paper.path(line);
+		} else {
+			line = sectorPath(width / 2, height / 2, 1, angle, degrees);
+			segment.segment = paper.path(line);
+
+			line = sectorPath(width / 2, height / 2, radius, angle, degrees);
+			setTimeout(function () {
+				segment.segment.animate({
+					path: line
+				}, animateTime, animate);
+			}, i * animateTime / 10);
+		}
+
+		angle += degrees;
+
+		segment.segment.attr({
+			stroke: borderColor,
+			fill: color,
+			opacity: opacity
+		});
+
+		segment.segment.hover(function () {
+			segment.segment.attr({
+				fill: this.attr('segmentHoverColor', args)
+			});
+			this.setText(this.attr('hoverText', [segment, name, data]));
+		}, function () {
+			segment.segment.attr('fill', color);
+			this.setText(info.title);
+		}, this);
+	}, this);
 };
 
 /**
@@ -431,203 +631,110 @@ Graph.prototype.drawScatterGraph = function (info) {
 };
 
 /**
- * Draws a bar chart. This is an internal function to get rid of some
- * indentation that would be required if it were in the above switch statement,
- * but is still useful for the documentation below.
+ * Set or get graph attributes. Accepts either two arguments (name and value,
+ * sets name attribute to value), or an object of attributes to set. You can
+ * also use it to retrieve an attribute (mostly for internal usage only). If
+ * value is undefined or an array, then it will get the attribute.
  *
- * @private
- *
- * @param {object} info Object containing the following properties:
- *  x: The name of the data on the x axis (will be used in the data objects).
- *      If not specified, will default to "x".
- *  y: The name of the data on the y axis (will be used in the data objects).
- *      If not specified, will default to "y".
- *  data: An array containing "data objects", saying where bars should be.
- *      A data object could be like this (if the x and y properties mentioned
- *      above are set to "person" and "cakes"):
- *      {person: 'Bob', cakes: 7}
+ * @param {object|string} name Either name of attribute to set, or object of
+ *  attributes to cycle through.
+ * @param {string|int|Array} value Value to set name attribute to, or array
+ *  to be used as arguments when attribute function is called.
  */
-Graph.prototype.drawBarChart = function (info) {
+Graph.prototype.attr = function (name, value) {
 	"use strict";
 
-	var paper = this.paper,
-		height = this.height,
-		width = this.width,
-		barWidth, length, maxY, tmp, x, y;
+	var attrs = this.attrs;
 
-	x = info.x || 'x';
-	y = info.y || 'y';
-
-	if (x === 'xpos' || y === 'ypos') {
-		throw new GraphError('Cannot use xpos or ypos as x and y keys');
-	}
-
-	// Work out maxY and add 5%
-	maxY = info.data[0][y];
-	Graph.each(info.data, function (bar) {
-		if (bar[y] > maxY) {
-			maxY = bar[y];
-		}
-	});
-	maxY *= 1.05;
-
-	if (this.attr('direction') === 'horizontal') {
-		tmp = width;
-		width = height;
-		height = tmp;
-	}
-
-	length = info.data.length;
-	barWidth = width / length * 0.8;
-
-	// Draw the bars
-	Graph.each(info.data, function (point, index) {
-		var animate = this.attr('animate'),
-			animateTime = this.attr('animateTime'),
-			bar, color;
-
-		point.xpos = width / length * (index + 0.1);
-		point.ypos = (height - height / maxY * point[y] - 2);
-		point.barHeight = height - point.ypos - 1;
-
-		if (animate === 'none') {
-			if (this.attr('direction') === 'horizontal') {
-				bar = paper.rect(5, point.xpos, point.barHeight, barWidth);
-			} else {
-				bar = paper.rect(point.xpos, point.ypos, barWidth, point.barHeight);
-			}
-		} else {
-			if (this.attr('direction') === 'horizontal') {
-				bar = paper.rect(5, point.xpos, 0, barWidth);
-				setTimeout(function () {
-					bar.animate({
-						width: point.barHeight
-					}, animateTime, animate);
-				}, index * animateTime / 10);
-			} else {
-				bar = paper.rect(point.xpos, point.ypos + point.barHeight, barWidth, 0);
-				setTimeout(function () {
-					bar.animate({
-						y: point.ypos,
-						height: point.barHeight
-					}, animateTime, animate);
-				}, index * animateTime / 10);
-			}
-		}
-		color = this.attr('barColor', [point[y], maxY]);
-
-		point.bar = bar;
-		bar.attr({
-			'stroke': this.attr('barBorderColor', [point[y], maxY]),
-			'fill': color,
-			'opacity': this.attr('barOpacity', [point[y], maxY])
-		});
-
-		bar.hover(function () {
-			bar.attr('fill', this.attr('barHoverColor', [point[y], maxY]));
-			this.setText(this.attr('hoverText', [point, x, y]));
-		}, function () {
-			bar.attr('fill', color);
-			this.setText(info.title);
+	if (typeof name === 'object') {
+		Graph.each(name, function (attr, value) {
+			this.attr(attr, value);
 		}, this);
-	}, this);
+	} else if (typeof value === 'undefined' || Graph.isArray(value)) {
+		if (typeof attrs[name] === 'function') {
+			return attrs[name].apply(null, value);
+		} else {
+			return attrs[name];
+		}
+	} else {
+		attrs[name] = value;
+
+		if (name === 'title') {
+			this.info.title = value;
+			this.setText(value);
+		}
+	}
+
+	return this;
 };
 
 /**
- * Draws a pie chart. This is an internal function to get rid of some
- * indentation that would be required if it were in the above switch statement,
- * but is still useful for the documentation below.
+ * Internal function for looping through arrays and objects.
  *
  * @private
  *
- * @param {object} info Object containing the following properties:
- *  dataName: The name of the data on the x axis (will be used in the data
- *      objects). If not specified, will default to "x".
- *  dataData: The name of the data on the y axis (will be used in the data
- *      objects). If not specified, will default to "y".
- *  data: An array containing "data objects", saying where bars should be.
- *      A data object could be like this (if the dataName and dataData
- *      properties mentioned above are set to "person" and "cakes"):
- *      {person: 'Bob', cakes: 7}
+ * @param {Array|object} ary Array or object to loop through.
+ * @param {function} cb Function to call on each item.
  */
-Graph.prototype.drawPieChart = function (info) {
+Graph.each = function (ary, cb, scope) {
 	"use strict";
 
-	var paper = this.paper,
-		width = this.width,
-		height = this.height,
-		angle = 0,
-		name, data, maxData, totalData;
-
-	name = info.dataName || 'name';
-	data = info.dataData || 'data';
-
-	// Work out maxData and totalData
-	maxData = info.data[0][data];
-	totalData = 0;
-	Graph.each(info.data, function (segment) {
-		totalData += segment[data];
-		if (segment[data] > maxData) {
-			maxData = segment[data];
-		}
-	});
-	maxData *= 1.05;
-
-	function sectorPath(cx, cy, r, startAngle, degrees) {
-		var rad = Math.PI / 180,
-			x1 = cx + r * Math.cos(-startAngle * rad),
-			x2 = cx + r * Math.cos(-(startAngle + degrees) * rad),
-			y1 = cy + r * Math.sin(-startAngle * rad),
-			y2 = cy + r * Math.sin(-(startAngle + degrees) * rad);
-		return ['M', cx, cy, 'L', x1, y1,
-			'A', r, r, 0, +(degrees > 180), 0, x2, y2, 'z'];
+	if (typeof scope === 'undefined') {
+		scope = this;
 	}
 
-	// Draw segments
-	Graph.each(info.data, function (segment, i) {
-		var degrees = 360 / totalData * segment[data],
-			args = [segment[data], maxData],
-			borderColor = this.attr('segmentBorderColor', args),
-			color = this.attr('segmentColor', args),
-			radius = this.attr('segmentRadius', args),
-			opacity = this.attr('segmentOpacity', args),
-			animate = this.attr('animate'),
-			animateTime = this.attr('animateTime'),
-			line;
-
-		if (animate === 'none') {
-			line = sectorPath(width / 2, height / 2, radius, angle, degrees);
-			segment.segment = paper.path(line);
-		} else {
-			line = sectorPath(width / 2, height / 2, 1, angle, degrees);
-			segment.segment = paper.path(line);
-
-			line = sectorPath(width / 2, height / 2, radius, angle, degrees);
-			setTimeout(function () {
-				segment.segment.animate({
-					path: line
-				}, animateTime, animate);
-			}, i * animateTime / 10);
+	if (Graph.isArray(ary)) {
+		for (var i = 0; i < ary.length; i++) {
+			cb.call(scope, ary[i], i);
 		}
+	} else {
+		for (var prop in ary) {
+			if (ary.hasOwnProperty(prop)) {
+				cb.call(scope, prop, ary[prop]);
+			}
+		}
+	}
 
-		angle += degrees;
+	return this;
+};
 
-		segment.segment.attr({
-			stroke: borderColor,
-			fill: color,
-			opacity: opacity
-		});
+/**
+ * Internal function for detecting whether objects are arrays.
+ *
+ * @private
+ *
+ * @param {*} value Object to test.
+ * @return {boolean} Returns true if object is array.
+ */
+Graph.isArray = function (value) {
+	"use strict";
 
-		segment.segment.hover(function () {
-			segment.segment.attr({
-				fill: this.attr('segmentHoverColor', args)
-			});
-			this.setText(this.attr('hoverText', [segment, name, data]));
-		}, function () {
-			segment.segment.attr('fill', color);
-			this.setText(info.title);
-		}, this);
-	}, this);
+	return Object.prototype.toString.call(value) === '[object Array]';
+};
+
+/**
+ * Redraws graph. Deleted old information and starts again.
+ *
+ * @param {object} info New info (optional).
+ */
+Graph.prototype.redraw = function (info) {
+	"use strict";
+
+	this.paper.clear();
+	if (this._removeListeners) {
+		this._removeListeners();
+		delete this._removeListeners;
+	}
+
+	if (typeof info !== 'object') {
+		info = this.info;
+		if (this.originalData) {
+			info.data = this.originalData;
+		}
+	}
+	this.draw(info);
+
+	return this;
 };
 
 /**
@@ -678,112 +785,6 @@ Graph.prototype.setText = function (text) {
 		});
 };
 
-/**
- * Internal function for looping through arrays and objects.
- *
- * @private
- *
- * @param {Array|object} ary Array or object to loop through.
- * @param {function} cb Function to call on each item.
- */
-Graph.each = function (ary, cb, scope) {
-	"use strict";
-
-	if (typeof scope === 'undefined') {
-		scope = this;
-	}
-
-	if (Graph.isArray(ary)) {
-		for (var i = 0; i < ary.length; i++) {
-			cb.call(scope, ary[i], i);
-		}
-	} else {
-		for (var prop in ary) {
-			if (ary.hasOwnProperty(prop)) {
-				cb.call(scope, prop, ary[prop]);
-			}
-		}
-	}
-
-	return this;
-};
-
-/**
- * Internal function for detecting whether objects are arrays.
- *
- * @private
- *
- * @param {*} value Object to test.
- * @return {boolean} Returns true if object is array.
- */
-Graph.isArray = function (value) {
-	"use strict";
-
-	return Object.prototype.toString.call(value) === '[object Array]';
-};
-
-/**
- * Set or get graph attributes. Accepts either two arguments (name and value,
- * sets name attribute to value), or an object of attributes to set. You can
- * also use it to retrieve an attribute (mostly for internal usage only). If
- * value is undefined or an array, then it will get the attribute.
- *
- * @param {object|string} name Either name of attribute to set, or object of
- *  attributes to cycle through.
- * @param {string|int|Array} value Value to set name attribute to, or array
- *  to be used as arguments when attribute function is called.
- */
-Graph.prototype.attr = function (name, value) {
-	"use strict";
-
-	var attrs = this.attrs;
-
-	if (typeof name === 'object') {
-		Graph.each(name, function (attr, value) {
-			this.attr(attr, value);
-		}, this);
-	} else if (typeof value === 'undefined' || Graph.isArray(value)) {
-		if (typeof attrs[name] === 'function') {
-			return attrs[name].apply(null, value);
-		} else {
-			return attrs[name];
-		}
-	} else {
-		attrs[name] = value;
-
-		if (name === 'title') {
-			this.info.title = value;
-			this.setText(value);
-		}
-	}
-
-	return this;
-};
-
-/**
- * Redraws graph. Deleted old information and starts again.
- *
- * @param {object} info New info (optional).
- */
-Graph.prototype.redraw = function (info) {
-	"use strict";
-
-	this.paper.clear();
-	if (this._removeListeners) {
-		this._removeListeners();
-		delete this._removeListeners;
-	}
-
-	if (typeof info !== 'object') {
-		info = this.info;
-		if (this.originalData) {
-			info.data = this.originalData;
-		}
-	}
-	this.draw(info);
-
-	return this;
-};
 
 // AJAX object
 Graph.ajax = {};
@@ -982,6 +983,7 @@ Graph.prototype.off = function (event, fn) {
 		};
 	});
 })();
+
 
 // If jQuery library is loaded, create a jQuery.fn.graph function.
 if (typeof jQuery !== 'undefined') {
