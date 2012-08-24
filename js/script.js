@@ -210,7 +210,11 @@ graph.click(function () {
 el = document.getElementById('graph7');
 graph = new Graph(el, 300, 200);
 
+var i = 0;
 graph.attr({
+	barColor: function () {
+		return (i++ % 2) ? 'red' : 'lightblue';
+	},
 	barWidth: 0.2,
 	animate: 'backOut',
 	animateTime: 700
@@ -277,7 +281,7 @@ graph = new Graph(el, 300, 200);
 graph.draw({
 	type: 'scatter',
 	title: 'AJAX scatter graph',
-	data: './demo_php',
+	data: './demo_php/',
 	attrs: {
 		pointRadius: 2,
 		showGrid: true
