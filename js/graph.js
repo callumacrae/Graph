@@ -104,7 +104,7 @@ Graph.prototype.draw = function (info, originalData) {
 		};
 	}
 
-	if (!this.isArray(info.data)) {
+	if (!Graph.isArray(info.data)) {
 		that = this;
 
 		if (this.attr('ajaxLoading')) {
@@ -119,7 +119,7 @@ Graph.prototype.draw = function (info, originalData) {
 			});
 		}
 
-		this.get(info.data.url, info.data.data, function (body) {
+		Graph.get(info.data.url, info.data.data, function (body) {
 			var originalData = info.data;
 			info.data = (typeof body === 'object') ? body : JSON.parse(body);
 			that.paper.clear();
@@ -198,7 +198,7 @@ Graph.prototype.drawLineGraph = function (info) {
 			xsum = ysum = xysum = xxsum = yysum = 0;
 			n = info.data.length;
 
-			this.each(info.data, function (point) {
+			Graph.each(info.data, function (point) {
 				xsum += point.xpos;
 				ysum += point.ypos;
 				xysum += point.xpos * point.ypos;
@@ -213,7 +213,7 @@ Graph.prototype.drawLineGraph = function (info) {
 			break;
 
 		case 'curved':
-			this.each(info.data, function (point, i) {
+			Graph.each(info.data, function (point, i) {
 				if (i === 0) {
 					line = 'M' + point.xpos + ' ' + point.ypos + 'R';
 				} else {
@@ -224,7 +224,7 @@ Graph.prototype.drawLineGraph = function (info) {
 
 		//case 'straight':
 		default:
-			this.each(info.data, function (point, i) {
+			Graph.each(info.data, function (point, i) {
 				if (i === 0) {
 					line = 'M' + point.xpos + ' ' + point.ypos;
 				} else {
@@ -272,7 +272,7 @@ Graph.prototype.drawScatterGraph = function (info) {
 		height = this.height,
 		width = this.width,
 		attr, graphX, graphY, perc5, maxX, maxY, minX, minY, mousein,
-		mousemoveHandler, mouseoutHandler, x, y;
+		mousemoveHandler, mouseoutHandler, that, x, y;
 
 	x = info.x || 'x';
 	y = info.y || 'y';
@@ -293,7 +293,7 @@ Graph.prototype.drawScatterGraph = function (info) {
 	});
 
 	// Get minY, maxX, etc.
-	this.each(info.data, function (point) {
+	Graph.each(info.data, function (point) {
 		if (point[x] > maxX) {
 			maxX = point[x];
 		} else if (point[x] < minX) {
@@ -316,7 +316,7 @@ Graph.prototype.drawScatterGraph = function (info) {
 	minY -= perc5;
 
 	// Draw the points
-	this.each(info.data, function (point, i) {
+	Graph.each(info.data, function (point, i) {
 		point.xpos = width / (maxX - minX) * (point[x] - minX);
 		point.ypos = height / (maxY - minY) * (maxY - point[y]);
 
@@ -421,11 +421,11 @@ Graph.prototype.drawScatterGraph = function (info) {
 		};
 
 		this.mousemove(mousemoveHandler);
-		this.events.add(document, 'mousemove', mouseoutHandler);
+		Graph.events.add(document, 'mousemove', mouseoutHandler);
 
 		this._removeListeners = function () {
 			this.unmousemove(mousemoveHandler);
-			this.events.remove(document, 'mousemove', mouseoutHandler);
+			Graph.events.remove(document, 'mousemove', mouseoutHandler);
 		};
 	}
 };
@@ -464,7 +464,7 @@ Graph.prototype.drawBarChart = function (info) {
 
 	// Work out maxY and add 5%
 	maxY = info.data[0][y];
-	this.each(info.data, function (bar) {
+	Graph.each(info.data, function (bar) {
 		if (bar[y] > maxY) {
 			maxY = bar[y];
 		}
@@ -481,7 +481,7 @@ Graph.prototype.drawBarChart = function (info) {
 	barWidth = width / length * 0.8;
 
 	// Draw the bars
-	this.each(info.data, function (point, index) {
+	Graph.each(info.data, function (point, index) {
 		var animate = this.attr('animate'),
 			animateTime = this.attr('animateTime'),
 			bar, color;
@@ -565,7 +565,7 @@ Graph.prototype.drawPieChart = function (info) {
 	// Work out maxData and totalData
 	maxData = info.data[0][data];
 	totalData = 0;
-	this.each(info.data, function (segment) {
+	Graph.each(info.data, function (segment) {
 		totalData += segment[data];
 		if (segment[data] > maxData) {
 			maxData = segment[data];
@@ -584,7 +584,7 @@ Graph.prototype.drawPieChart = function (info) {
 	}
 
 	// Draw segments
-	this.each(info.data, function (segment, i) {
+	Graph.each(info.data, function (segment, i) {
 		var degrees = 360 / totalData * segment[data],
 			args = [segment[data], maxData],
 			borderColor = this.attr('segmentBorderColor', args),
@@ -686,14 +686,14 @@ Graph.prototype.setText = function (text) {
  * @param {Array|object} ary Array or object to loop through.
  * @param {function} cb Function to call on each item.
  */
-Graph.prototype.each = function (ary, cb, scope) {
+Graph.each = function (ary, cb, scope) {
 	"use strict";
 
 	if (typeof scope === 'undefined') {
 		scope = this;
 	}
 
-	if (this.isArray(ary)) {
+	if (Graph.isArray(ary)) {
 		for (var i = 0; i < ary.length; i++) {
 			cb.call(scope, ary[i], i);
 		}
@@ -716,7 +716,7 @@ Graph.prototype.each = function (ary, cb, scope) {
  * @param {*} value Object to test.
  * @return {boolean} Returns true if object is array.
  */
-Graph.prototype.isArray = function (value) {
+Graph.isArray = function (value) {
 	"use strict";
 
 	return Object.prototype.toString.call(value) === '[object Array]';
@@ -739,10 +739,10 @@ Graph.prototype.attr = function (name, value) {
 	var attrs = this.attrs;
 
 	if (typeof name === 'object') {
-		this.each(name, function (attr, value) {
-		this.attr(attr, value);
-		});
-	} else if (typeof value === 'undefined' || this.isArray(value)) {
+		Graph.each(name, function (attr, value) {
+			this.attr(attr, value);
+		}, this);
+	} else if (typeof value === 'undefined' || Graph.isArray(value)) {
 		if (typeof attrs[name] === 'function') {
 			return attrs[name].apply(null, value);
 		} else {
@@ -785,6 +785,9 @@ Graph.prototype.redraw = function (info) {
 	return this;
 };
 
+// AJAX object
+Graph.ajax = {};
+
 /**
  * Request a page (AJAX!). Mostly used internally, but publicly exposed.
  *
@@ -793,7 +796,7 @@ Graph.prototype.redraw = function (info) {
  * @param {string} data Data to request with.
  * @param {function} callback Callback to call when request responds.
  */
-Graph.prototype.request = function (method, url, data, callback) {
+Graph.request = function (method, url, data, callback) {
 	"use strict";
 
 	var req;
@@ -830,7 +833,7 @@ Graph.prototype.request = function (method, url, data, callback) {
 	};
 	req.send((typeof data === 'string' && method === 'POST') ? data : null);
 
-	return req;
+	req;
 };
 
 /**
@@ -841,10 +844,10 @@ Graph.prototype.request = function (method, url, data, callback) {
  * @param {string} data GET data to request with.
  * @param {function} callback Callback to call when request responds.
  */
-Graph.prototype.get = function (url, data, callback) {
+Graph.get = function (url, data, callback) {
 	"use strict";
 
-	return this.request('GET', url, data, callback);
+	this.request('GET', url, data, callback);
 };
 
 /**
@@ -855,15 +858,15 @@ Graph.prototype.get = function (url, data, callback) {
  * @param {string} data POST data to request with.
  * @param {function} callback Callback to call when request responds.
  */
-Graph.prototype.post = function (url, data, callback) {
+Graph.post = function (url, data, callback) {
 	"use strict";
 
-	return this.request('POST', url, data, callback);
+	this.request('POST', url, data, callback);
 };
 
 
 // Events object for adding and removing events
-Graph.prototype.events = {};
+Graph.events = {};
 
 /**
  * Add an event handler to an element.
@@ -872,9 +875,9 @@ Graph.prototype.events = {};
  * @param event Event to listen for.
  * @param handler Function to call when event is fired.
  */
-Graph.prototype.events.add = function (element, event, handler) {
-	if (!this._listeners) {
-		this._listeners = [];
+Graph.events.add = function (element, event, handler) {
+	if (!Graph._listeners) {
+		Graph._listeners = [];
 	}
 
 	if (element.addEventListener) {
@@ -891,10 +894,8 @@ Graph.prototype.events.add = function (element, event, handler) {
 			handler.call(element, e);
 		};
 		element.attachEvent('on' + event, newHandler);
-		this._listeners.push([handler, newHandler]);
+		Graph._listeners.push([handler, newHandler]);
 	}
-
-	return this;
 };
 /**
  * Remove an event handler from an object.
@@ -903,12 +904,12 @@ Graph.prototype.events.add = function (element, event, handler) {
  * @param event Event to remove.
  * @param handler Event handler to remove.
  */
-Graph.prototype.events.remove = function (element, event, handler) {
-	if (!this._listeners) {
-		this._listeners = [];
+Graph.events.remove = function (element, event, handler) {
+	if (!Graph._listeners) {
+		Graph._listeners = [];
 	}
 
-	var listeners = this._listeners;
+	var listeners = Graph._listeners;
 
 	if (element.removeEventListener) {
 		element.removeEventListener(event, handler);
@@ -920,8 +921,6 @@ Graph.prototype.events.remove = function (element, event, handler) {
 			}
 		}
 	}
-
-	return this;
 };
 
 /**
@@ -940,7 +939,7 @@ Graph.prototype.on = function (event, fn) {
 			fn.call(that, e);
 		};
 
-	this.events.add(this.element, event, handler);
+	Graph.events.add(this.element, event, handler);
 	this._ownListeners.push([fn, handler]);
 
 	return this;
@@ -958,12 +957,12 @@ Graph.prototype.off = function (event, fn) {
 		return; // If it doesn't exist, neither does event
 	}
 
-	this.each(this._ownListeners, function (listener, i) {
+	Graph.each(this._ownListeners, function (listener, i) {
 		if (listener[0] === fn) {
-			this.events.remove(this.element, event, listener[1]);
+			Graph.events.remove(this.element, event, listener[1]);
 			this._ownListeners.splice(i, 0);
 		}
-	});
+	}, this);
 
 	return this;
 };
@@ -973,7 +972,7 @@ Graph.prototype.off = function (event, fn) {
 	var events = 'blur focus focusin focusout load unload click dblclick ' +
 		'mousedown mouseup mouseover mouseout mouseenter mouseleave mousemove';
 
-	Graph.prototype.each(events.split(' '), function (event) {
+	Graph.each(events.split(' '), function (event) {
 		Graph.prototype[event] = function (fn) {
 			return this.on(event, fn);
 		};
