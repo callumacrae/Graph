@@ -211,6 +211,35 @@ el = document.getElementById('graph7');
 graph = new Graph(el, 300, 200);
 
 graph.attr({
+	barWidth: 0.2,
+	animate: 'backOut',
+	animateTime: 700
+});
+graph.draw({
+	type: 'bar',
+	title: 'Narrow bar chart',
+	x: 'person',
+	y: 'spoons',
+	data: [
+		{person: 'Bob', spoons: 2},
+		{person: 'Mary', spoons: 6},
+		{person: 'Sam', spoons: 3},
+		{person: 'Callum', spoons: 4.5},
+		{person: 'Alex', spoons: 7},
+		{person: 'Mork', spoons: 1},
+		{person: 'Lexus', spoons: 5}
+	]
+});
+
+graph.click(function () {
+	this.redraw();
+});
+
+
+el = document.getElementById('graph8');
+graph = new Graph(el, 300, 200);
+
+graph.attr({
 	segmentColor: function (data, maxData) {
 		var red = Math.round(255 - 255 / maxData * data).toString(16);
 		if (red.length === 1) {
@@ -242,7 +271,7 @@ graph.click(function () {
 });
 
 
-el = document.getElementById('graph8');
+el = document.getElementById('graph9');
 graph = new Graph(el, 300, 200);
 
 graph.draw({

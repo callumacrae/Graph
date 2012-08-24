@@ -30,6 +30,7 @@ function Graph(element, width, height) {
 		barColor: 'red', // Colour of bars (can be a function)
 		barHoverColor: 'darkgray',
 		barOpacity: 1, // Opacity of bars
+		barWidth: 0.8, // Width of bars (default 0.8)
 		cursor: 'default', // Cursor (default "default")
 		direction: 'vertical', // Direction of bars in bar chart
 		gridLineWidth: 1, // Width of grid line in pixels
@@ -185,7 +186,7 @@ Graph.prototype.drawBarChart = function (info) {
 	var paper = this.paper,
 		height = this.height,
 		width = this.width,
-		barWidth, length, maxY, tmp, x, y;
+		length, maxY, tmp, x, y;
 
 	x = info.x || 'x';
 	y = info.y || 'y';
@@ -210,15 +211,17 @@ Graph.prototype.drawBarChart = function (info) {
 	}
 
 	length = info.data.length;
-	barWidth = width / length * 0.8;
 
 	// Draw the bars
 	Graph.each(info.data, function (point, index) {
 		var animate = this.attr('animate'),
 			animateTime = this.attr('animateTime'),
-			bar, color;
+			bar, barWidth, color, lenWidth;
 
-		point.xpos = width / length * (index + 0.1);
+		lenWidth = width / length;
+
+		barWidth = lenWidth * this.attr('barWidth', [point[y], maxY]);
+		point.xpos = lenWidth * index + (lenWidth - barWidth) / 2;
 		point.ypos = (height - height / maxY * point[y] - 2);
 		point.barHeight = height - point.ypos - 1;
 
