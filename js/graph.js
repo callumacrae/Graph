@@ -120,7 +120,7 @@ Graph.prototype.draw = function (info, originalData) {
 			});
 		}
 
-		Graph.get(info.data.url, info.data.data, function (body) {
+		Graph.ajax.get(info.data.url, info.data.data, function (body) {
 			var originalData = info.data;
 			info.data = (typeof body === 'object') ? body : JSON.parse(body);
 			that.paper.clear();
@@ -800,7 +800,7 @@ Graph.ajax = {};
  * @param {string} data Data to request with.
  * @param {function} callback Callback to call when request responds.
  */
-Graph.request = function (method, url, data, callback) {
+Graph.ajax.request = function (method, url, data, callback) {
 	"use strict";
 
 	var req;
@@ -837,7 +837,7 @@ Graph.request = function (method, url, data, callback) {
 	};
 	req.send((typeof data === 'string' && method === 'POST') ? data : null);
 
-	req;
+	return req;
 };
 
 /**
@@ -848,10 +848,10 @@ Graph.request = function (method, url, data, callback) {
  * @param {string} data GET data to request with.
  * @param {function} callback Callback to call when request responds.
  */
-Graph.get = function (url, data, callback) {
+Graph.ajax.get = function (url, data, callback) {
 	"use strict";
 
-	this.request('GET', url, data, callback);
+	return this.request('GET', url, data, callback);
 };
 
 /**
@@ -862,10 +862,10 @@ Graph.get = function (url, data, callback) {
  * @param {string} data POST data to request with.
  * @param {function} callback Callback to call when request responds.
  */
-Graph.post = function (url, data, callback) {
+Graph.ajax.post = function (url, data, callback) {
 	"use strict";
 
-	this.request('POST', url, data, callback);
+	return this.request('POST', url, data, callback);
 };
 
 
