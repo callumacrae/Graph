@@ -406,8 +406,8 @@ Graph.prototype.drawScatterGraph = function (info) {
 		};
 
 		mouseoutHandler = function (e) {
-			var x = e.clientX,
-				y = e.clientY;
+			var x = e.pageX,
+				y = e.pageY;
 
 			if (mousein && (x < element.offsetLeft ||
 				x > element.offsetLeft + element.clientWidth ||
