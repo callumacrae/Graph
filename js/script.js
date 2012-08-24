@@ -41,7 +41,7 @@ graph.attr({
 	},
 	pointOpacity: 0.9,
 	pointRadius: 3,
-	textPosition: 'left'
+	titlePosition: 'left'
 });
 graph.draw({
 	type: 'line',
@@ -73,7 +73,7 @@ graph = new Graph(el, 300, 200);
 
 graph.attr({
 	pointRadius: 4,
-	textPosition: 'left',
+	titlePosition: 'left',
 	lineWidth: 2,
 	animate: 'bounce',
 	animateTime: 1000
@@ -111,7 +111,7 @@ graph.attr({
 	pointRadius: function (y, maxY) {
 		return 15 / maxY * y + 2;
 	},
-	textPosition: 'center',
+	titlePosition: 'center',
 	showGrid: true,
 	cursor: 'pointer',
 	animate: 'linear',

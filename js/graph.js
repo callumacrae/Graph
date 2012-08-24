@@ -42,13 +42,18 @@ function Graph(element, width, height) {
 		lineColor: 'black', // Colour of lines
 		lineOpacity: 1, // Opacity of line
 		lineWidth: 1, // Width of line in pixels
+		loadingText: 'Loading...', // Text to display when loading
 		segmentBorderColor: 'black', // Colour of border of pie chart segments
 		segmentColor: 'red', // Colour of pie chart segment
 		segmentHoverColor: 'darkgray', // Colour of pie chart segment on hover
 		segmentOpacity: 1, // Opacity of pie chart segment
 		segmentRadius: 100, // Radius of pie chart segments
 		showGrid: false, // Whether to show the grid-thing or not
-		textPosition: 'right' // Position of text (left, right, center)
+		textFont: 'Arial', // Font family of all text
+		textSize: 10, // Font size of all text
+		textOpacity: 1, // Opacity of all text
+		textColor: 'black', // Colour of all text
+		titlePosition: 'right' // Position of title (left, right, center)
 	};
 
 	this.attrs.hoverText = function (point, x, y) {
@@ -85,7 +90,7 @@ GraphError.prototype.constructor = GraphError;
 Graph.prototype.draw = function (info, originalData) {
 	"use strict";
 
-	var cursor, that;
+	var cursor, text, that;
 
 	this.setText(info.title);
 
@@ -103,7 +108,15 @@ Graph.prototype.draw = function (info, originalData) {
 		that = this;
 
 		if (this.attr('ajaxLoading')) {
-			this.paper.text(this.width / 2, this.height / 2, 'Loading...');
+			text = this.attr('loadingText');
+			text = this.paper.text(this.width / 2, this.height / 2, text);
+
+			text.attr({
+				'font-family': this.attr('textFont'),
+				'font-size': this.attr('textSize'),
+				'opacity': this.attr('textOpacity'),
+				'fill': this.attr('textColor')
+			});
 		}
 
 		this.get(info.data.url, info.data.data, function (body) {
@@ -637,7 +650,7 @@ Graph.prototype.setText = function (text) {
 
 	var tmpTextNode = this.paper.text(this.width / 2, 15, text),
 		textWidth = tmpTextNode[0].clientWidth,
-		textPosition = this.attr('textPosition'),
+		textPosition = this.attr('titlePosition'),
 		x;
 
 	if (typeof this.textNode !== 'undefined') {
@@ -646,7 +659,13 @@ Graph.prototype.setText = function (text) {
 
 	if (textPosition === 'center') {
 		this.textNode = tmpTextNode; // Not so tmp...
-		tmpTextNode.attr('cursor', 'text');
+		tmpTextNode.attr({
+			'cursor': 'text',
+			'font-family': this.attr('textFont'),
+			'font-size': this.attr('textSize'),
+			'opacity': this.attr('textOpacity'),
+			'fill': this.attr('textColor')
+		});
 		return;
 	}
 
@@ -659,8 +678,14 @@ Graph.prototype.setText = function (text) {
 	}
 
 	this.textNode = this.paper.text(x, 15, text);
-	this.textNode.attr('cursor', 'text');
-	this.textNode.toFront();
+	this.textNode.toFront()
+		.attr({
+			'cursor': 'text',
+			'font-family': this.attr('textFont'),
+			'font-size': this.attr('textSize'),
+			'opacity': this.attr('textOpacity'),
+			'fill': this.attr('textColor')
+		});
 };
 
 /**
