@@ -972,8 +972,8 @@ Graph.prototype.off = function (event, fn) {
 };
 
 // Add all event listener alias methods
-Graph.each('blur focus load unload click dblclick mousedown mouseup mouseover' +
-	' mouseout mouseenter mouseleave mousemove'.split(' '), function (event) {
+Graph.each(('blur focus load unload click dblclick mousedown mouseup mouseover' +
+	' mouseout mouseenter mouseleave mousemove').split(' '), function (event) {
 	Graph.prototype[event] = function (fn) {
 		return this.on(event, fn);
 	};
