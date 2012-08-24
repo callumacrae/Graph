@@ -420,22 +420,12 @@ Graph.prototype.drawScatterGraph = function (info) {
 			}
 		};
 
-		if (this.element.addEventListener) {
-			this.element.addEventListener('mousemove', mousemoveHandler);
-			document.addEventListener('mousemove', mouseoutHandler);
-		} else {
-			this.element.attachEvent('onmousemove', mousemoveHandler);
-			document.attachEvent('onmousemove', mouseoutHandler);
-		}
+		this.mousemove(mousemoveHandler);
+		this.events.add(document, 'mousemove', mouseoutHandler);
 
 		this._removeListeners = function () {
-			if (this.element.removeEventListener) {
-				this.element.removeEventListener('mousemove', mousemoveHandler);
-				document.removeEventListener('mousemove', mouseoutHandler);
-			} else {
-				this.element.detachEvent('onmousemove', mousemoveHandler);
-				document.detachEvent('onmousemove', mouseoutHandler);
-			}
+			this.off('mousemove', mousemoveHandler);
+			this.events.remove(document, 'mousemove', mouseoutHandler);
 		};
 	}
 };
@@ -796,29 +786,6 @@ Graph.prototype.redraw = function (info) {
 };
 
 /**
- * When the graph is clicked, fires callback function.
- *
- * @param {function} fn Function to use as callback.
- */
-Graph.prototype.click = function (fn) {
-	"use strict";
-
-	var that = this;
-
-	if (document.addEventListener) {
-		this.element.addEventListener('click', function () {
-			fn.call(that);
-		});
-	} else {
-		this.element.attachEvent('onclick', function () {
-			fn.call(that);
-		});
-	}
-
-	return this;
-};
-
-/**
  * Request a page (AJAX!). Mostly used internally, but publicly exposed.
  *
  * @param {string} method Method to request URL with.
@@ -894,6 +861,122 @@ Graph.prototype.post = function (url, data, callback) {
 	return this.request('POST', url, data, callback);
 };
 
+
+// Events object for adding and removing events
+Graph.prototype.events = {};
+
+/**
+ * Add an event handler to an element.
+ *
+ * @param element Element to add event handler to.
+ * @param event Event to listen for.
+ * @param handler Function to call when event is fired.
+ */
+Graph.prototype.events.add = function (element, event, handler) {
+	if (!this._listeners) {
+		this._listeners = [];
+	}
+
+	if (element.addEventListener) {
+		element.addEventListener(event, handler);
+	} else if (element.attachEvent) {
+		var newHandler = function (e) {
+			e.preventDefault = function () {
+				e.returnValue = false;
+			};
+			e.stopPropagation = function () {
+				e.cancelBubble = true;
+			};
+
+			handler.call(element, e);
+		};
+		element.attachEvent('on' + event, newHandler);
+		this._listeners.push([handler, newHandler]);
+	}
+
+	return this;
+};
+/**
+ * Remove an event handler from an object.
+ *
+ * @param element Element to remove event handler from.
+ * @param event Event to remove.
+ * @param handler Event handler to remove.
+ */
+Graph.prototype.events.remove = function (element, event, handler) {
+	if (!this._listeners) {
+		this._listeners = [];
+	}
+
+	var listeners = this._listeners;
+
+	if (element.removeEventListener) {
+		element.removeEventListener(event, handler);
+	} else if (element.detachEvent) {
+		for (var i = 0; i < listeners.length; i++) {
+			if (listeners[i][0] === handler) {
+				element.detachEvent('on' + event, listeners[i][1]);
+				break;
+			}
+		}
+	}
+
+	return this;
+};
+
+/**
+ * Adds event handler to graph itself.
+ *
+ * @param {string} event Event name.
+ * @param {function} fn Function to call.
+ */
+Graph.prototype.on = function (event, fn) {
+	if (!this._ownListeners) {
+		this._ownListeners = [];
+	}
+
+	var that = this,
+		handler = function (e) {
+			fn.call(that, e);
+		};
+
+	this.events.add(this.element, event, handler);
+	this._ownListeners.push([fn, handler]);
+
+	return this;
+};
+
+/**
+ * Removes event handler from graph itself.
+ *
+ * @param {string} event Event name.
+ * @param {function} fn Handler to remove.
+ */
+Graph.prototype.off = function (event, fn) {
+	if (!this._ownListeners) {
+		this._ownListeners = [];
+	}
+
+	this.each(this._ownListeners, function (listener) {
+		if (listener[0] === fn) {
+			this.events.remove(this.element, event, listener[1]);
+		}
+	});
+
+	return this;
+};
+
+// Add all event listener alias methods
+(function () {
+	var events = 'blur focus focusin focusout load unload click dblclick ' +
+		'mousedown mouseup mouseover mouseout mouseenter mouseleave mousemove';
+
+	Graph.prototype.each(events.split(' '), function (event) {
+		Graph.prototype[event] = function (fn) {
+			return this.on(event, fn);
+		};
+	});
+})();
 
 // If jQuery library is loaded, create a jQuery.fn.graph function.
 if (typeof jQuery !== 'undefined') {
