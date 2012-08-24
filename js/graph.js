@@ -818,6 +818,14 @@ Graph.prototype.click = function (fn) {
 	return this;
 };
 
+/**
+ * Request a page (AJAX!). Mostly used internally, but publicly exposed.
+ *
+ * @param {string} method Method to request URL with.
+ * @param {string} url URL to request.
+ * @param {string} data Data to request with.
+ * @param {function} callback Callback to call when request responds.
+ */
 Graph.prototype.request = function (method, url, data, callback) {
 	"use strict";
 
@@ -858,12 +866,28 @@ Graph.prototype.request = function (method, url, data, callback) {
 	return req;
 };
 
+/**
+ * Shortcut function to GET a URL using XHR. Mostly used internally, but
+ * publicly exposed.
+ *
+ * @param {string} url URL to request.
+ * @param {string} data GET data to request with.
+ * @param {function} callback Callback to call when request responds.
+ */
 Graph.prototype.get = function (url, data, callback) {
 	"use strict";
 
 	return this.request('GET', url, data, callback);
 };
 
+/**
+ * Shortcut function to POST a URL using XHR. Mostly used internally, but
+ * publicly exposed.
+ *
+ * @param {string} url URL to request.
+ * @param {string} data POST data to request with.
+ * @param {function} callback Callback to call when request responds.
+ */
 Graph.prototype.post = function (url, data, callback) {
 	"use strict";
 
