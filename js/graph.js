@@ -424,7 +424,7 @@ Graph.prototype.drawScatterGraph = function (info) {
 		this.events.add(document, 'mousemove', mouseoutHandler);
 
 		this._removeListeners = function () {
-			this.off('mousemove', mousemoveHandler);
+			this.unmousemove(mousemoveHandler);
 			this.events.remove(document, 'mousemove', mouseoutHandler);
 		};
 	}
@@ -955,11 +955,13 @@ Graph.prototype.on = function (event, fn) {
 Graph.prototype.off = function (event, fn) {
 	if (!this._ownListeners) {
 		this._ownListeners = [];
+		return; // If it doesn't exist, neither does event
 	}
 
-	this.each(this._ownListeners, function (listener) {
+	this.each(this._ownListeners, function (listener, i) {
 		if (listener[0] === fn) {
 			this.events.remove(this.element, event, listener[1]);
+			this._ownListeners.splice(i, 0);
 		}
 	});
 
@@ -974,6 +976,10 @@ Graph.prototype.off = function (event, fn) {
 	Graph.prototype.each(events.split(' '), function (event) {
 		Graph.prototype[event] = function (fn) {
 			return this.on(event, fn);
+		};
+
+		Graph.prototype['un' + event] = function (fn) {
+			return this.off(event, fn);
 		};
 	});
 })();
